@@ -1,0 +1,88 @@
+{
+  "repository": "https://github.com/HighTorque-Robotics/Panthera-HT_RoboTwin",
+  "commit": "02559b217308956f0ad58d94e01a2862293b12ff",
+  "license": "MIT",
+  "retrieved_date": "2026-09-23",
+  "files": [
+    {
+      "path": "collision_panthera.yml",
+      "upstream_path": "RoboTwin/assets/embodiments/panthera-6dof/collision_panthera.yml",
+      "sha256": "b82344307cadea915104727648aea2b345582914227df8ca67894b29e062dc54"
+    },
+    {
+      "path": "config.yml",
+      "upstream_path": "RoboTwin/assets/embodiments/panthera-6dof/config.yml",
+      "sha256": "313d60005941a86e9c0409aa29b99eac84a11783893f90e9251710a737864d17"
+    },
+    {
+      "path": "curobo.yml",
+      "upstream_path": "RoboTwin/assets/embodiments/panthera-6dof/curobo.yml",
+      "sha256": "5e73d20566ca49fe818f1cf759baa08c13eb118881a6ab807f63dc86039f0bc7"
+    },
+    {
+      "path": "LICENSE",
+      "upstream_path": "LICENSE",
+      "sha256": "67f547f923b2c61494b441f1f892b878a16e82d2076db376faa111e1a9fac112"
+    },
+    {
+      "path": "panthera_6dof.srdf",
+      "upstream_path": "RoboTwin/assets/embodiments/panthera-6dof/panthera_6dof.srdf",
+      "sha256": "accddb0dda99e3d49a734a2ae69a580d3c454a2629ff4c78f0772421b62f5106"
+    },
+    {
+      "path": "panthera_6dof.urdf",
+      "upstream_path": "RoboTwin/assets/embodiments/panthera-6dof/panthera_6dof.urdf",
+      "sha256": "20df19e2baee09b7d1d2b61cfd40d9bcf1082dde7bb8d2ee4957d1fb4b31b5a9"
+    },
+    {
+      "path": "meshes/base_link.STL",
+      "upstream_path": "RoboTwin/assets/embodiments/panthera-6dof/meshes/base_link.STL",
+      "sha256": "f38a649c739e201d721c9c3cd81bbc684298dc3c968fe8e92c65430cc62d9d43"
+    },
+    {
+      "path": "meshes/camera_link.STL",
+      "upstream_path": "RoboTwin/assets/embodiments/panthera-6dof/meshes/camera_link.STL",
+      "sha256": "6c353a10180fd1b59d271911adb5c19d4df43e659ec66be9863d3ca5d3fa1e0a"
+    },
+    {
+      "path": "meshes/gripper_L_link.STL",
+      "upstream_path": "RoboTwin/assets/embodiments/panthera-6dof/meshes/gripper_L_link.STL",
+      "sha256": "8174028345616654db05f6b2ea643edc5c52274aa188a3ba829119364dbf6a7b"
+    },
+    {
+      "path": "meshes/gripper_R_link.STL",
+      "upstream_path": "RoboTwin/assets/embodiments/panthera-6dof/meshes/gripper_R_link.STL",
+      "sha256": "9be7a9d48bf5b8b5b47858fe0ed143dd2c095d522ddac69c4bae767961a9e378"
+    },
+    {
+      "path": "meshes/link1.STL",
+      "upstream_path": "RoboTwin/assets/embodiments/panthera-6dof/meshes/link1.STL",
+      "sha256": "307070c1684f883ce7d96a914c3a25211b102016d8c62cd77c10a50e296acf32"
+    },
+    {
+      "path": "meshes/link2.STL",
+      "upstream_path": "RoboTwin/assets/embodiments/panthera-6dof/meshes/link2.STL",
+      "sha256": "09a473d84af125b58e1854c6577996e05ec1ede2b22eb1e9188e8765725bc0b0"
+    },
+    {
+      "path": "meshes/link3.STL",
+      "upstream_path": "RoboTwin/assets/embodiments/panthera-6dof/meshes/link3.STL",
+      "sha256": "642017627d2c40ed58f5ed6dc900e7efcc8376a0b4062a2d5a8ea0f6cf03137e"
+    },
+    {
+      "path": "meshes/link4.STL",
+      "upstream_path": "RoboTwin/assets/embodiments/panthera-6dof/meshes/link4.STL",
+      "sha256": "f1b97e4d6ad4e98130d5e9f42d2765449a619aa05937b9aac1917462ab419e43"
+    },
+    {
+      "path": "meshes/link5.STL",
+      "upstream_path": "RoboTwin/assets/embodiments/panthera-6dof/meshes/link5.STL",
+      "sha256": "96bf9d5d9faf0a120b775930e41d08547216fa54e53004f20c708e3a3b891769"
+    },
+    {
+      "path": "meshes/link6.STL",
+      "upstream_path": "RoboTwin/assets/embodiments/panthera-6dof/meshes/link6.STL",
+      "sha256": "027bbf8913b4b88e745109d326a103762548d3cd860d7786c3f7b38dddf87447"
+    }
+  ]
+}

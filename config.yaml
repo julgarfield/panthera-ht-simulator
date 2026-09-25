@@ -1,0 +1,68 @@
+simulation:
+  physics_hz: 240
+  control_hz: 120
+  display_hz: 30
+  gravity: [0, 0, -9.81]
+  realtime: true
+robot:
+  urdf_path: assets/panthera/panthera_6dof.urdf
+  srdf_path: assets/panthera/panthera_6dof.srdf
+  collision_config: assets/panthera/curobo.yml
+  base_position: [0, 0, 0.75]
+  base_rpy: [0, 0, 0]
+  end_effector_link: tool_link
+  # Simulation work pose, NOT a manufacturer home calibration. Upstream home = six zeros.
+  home_configuration: [0, 1.9, 1.7, -1.35, 0, 0]
+  gripper_open: 0.04
+  # Simulation servo parameters; effort/velocity limits come from the official URDF.
+  kp: [220, 300, 240, 120, 60, 60]
+  kd: [14, 18, 14, 7, 3, 3]
+  gripper_kp: 1000
+  gripper_kd: 15
+  joint_damping: 0.1
+  gripper_friction: 1.5
+environment:
+  table_position: [0.25, 0, 0.72]
+  table_size: [1.35, 1.0, 0.06]
+  objects:
+    - {name: cube, type: box, position: [0.34, 0.02, 0.783], size: [0.031, 0.031, 0.031], mass: 0.06, rgba: [0.9, 0.25, 0.15, 1]}
+    - {name: cylinder, type: cylinder, position: [0.39, 0.18, 0.787], size: [0.024, 0.035], mass: 0.07, rgba: [0.1, 0.55, 0.9, 1]}
+    - {name: block, type: box, position: [0.30, -0.18, 0.772], size: [0.035, 0.022, 0.02], mass: 0.08, rgba: [0.95, 0.7, 0.12, 1]}
+table_camera:
+  position: [1.05, -1.05, 1.40]
+  look_at: [0.22, 0, 0.94]
+  up: [0, 0, 1]
+  width: 640
+  height: 480
+  fps: 30
+  fov: 52
+wrist_camera:
+  parent_link: camera_link
+  # Lens pose is a configurable assumption: official housing has no optical-frame calibration.
+  position_offset: [0.025, 0, 0]
+  orientation_offset_rpy: [0, 0, 0]
+  forward: [1, 0, 0]
+  up: [0, 0, 1]
+  width: 640
+  height: 480
+  fps: 30
+  fov: 75
+controls:
+  joint_speed: 0.5
+  cartesian_translation_speed: 0.12
+  cartesian_rotation_speed: 0.6
+  gripper_speed: 0.025
+  ik_damping: 0.035
+  max_target_lead: 0.10
+logging:
+  dataset_directory: datasets
+  format: hdf5
+  compression: lzf
+  queue_size: 90
+ui:
+  width: 1480
+  height: 900
+  camera_distance: 1.65
+  camera_azimuth: 135
+  camera_elevation: -25
+  camera_lookat: [0.25, 0, 0.98]

@@ -1,0 +1,15 @@
+{
+  "gpu": "Intel(R) Arc(TM) Pro 140T GPU (32GB)",
+  "simulation_seconds": 30.0,
+  "wall_seconds": 30.11018289999629,
+  "camera_pairs": 900,
+  "camera_pairs_per_wall_second": 29.89022029487941,
+  "physics_steps_per_wall_second": 239.12176235903527,
+  "display_frames": 869,
+  "camera_pair_median_ms": 19.452050000836607,
+  "camera_pair_p95_ms": 22.13067501288606,
+  "limit_guard_corrections": 397,
+  "episodes": [
+    "validation_runs\\episode_0002"
+  ]
+}

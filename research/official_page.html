@@ -1,0 +1,2747 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panthera-HT Open-source 6-axis robotic arm | HighTorque</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        /* 顶部导航栏 */
+        .navbar {
+            position: fixed;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            padding: 12px 30px;
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(2.5px);
+            border-radius: 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.24s ease, opacity 0.24s ease;
+        }
+
+        .navbar.navbar-hidden {
+            transform: translateX(-50%) translateY(-80px);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Panthera-HT 品牌名 */
+        .navbar-brand {
+            font-size: 24px;
+            font-weight: 850;
+            color: #333;
+            text-decoration: none;
+        }
+
+        .navbar-links {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        /* 资料库、Github、联系入口 */
+        .navbar-links a {
+            text-decoration: none;
+            color: #393939;
+            font-size: 17px;
+            transition: color 0.3s;
+        }
+
+        .navbar-links a:hover {
+            color: #333;
+        }
+
+        .navbar-links a.navbar-link-strong {
+            font-weight: 600;
+            font-size: 17px;
+        }
+
+        /* 购买按钮 */
+        .btn-buy {
+            background: #ff6b35 !important;
+            color: #ffffff !important;
+            padding: 10px 25px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-size: 17px;
+            font-weight: 600;
+            transition: background 0.3s;
+            border: 1.8px solid rgba(226, 226, 226, 0.8);
+            margin-right: -16px;
+        }
+
+        .btn-buy:hover {
+            background: #ff5722 !important;
+            color: #ffffff !important;
+        }
+
+        /* 首页大图 */
+        .hero {
+            width: 100%;
+            margin-top: 0px;
+        }
+
+        .hero img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* 容器 */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 64px 20px 0;
+        }
+
+        /* 产品概览 */
+        .overview-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 36px;
+        }
+
+        .overview-separator {
+            position: relative;
+            left: 50%;
+            height: 100px;
+            margin: 18px 0 30px;
+            width: calc(100% + 700px);
+            max-width: 2000px;
+            transform: translateX(-50%);
+        }
+
+        .overview-separator::before {
+            content: "";
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 100%;
+            height: 2px;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(90deg, rgba(15, 23, 42, 0), rgba(15, 23, 42, 0.16) 18%, rgba(15, 23, 42, 0.3) 50%, rgba(15, 23, 42, 0.16) 82%, rgba(15, 23, 42, 0));
+        }
+
+        .overview-separator::after {
+            content: "";
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 112px;
+            height: 12px;
+            border-radius: 999px;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.86) 0%, rgba(247, 247, 247, 0) 100%);
+        }
+
+        .parameters,
+        .background {
+            background: transparent;
+            padding: 0;
+            border: none;
+            border-radius: 0;
+            box-shadow: none;
+        }
+
+        .parameters h2,
+        .background h2 {
+            font-size: 34px;
+            color: #222;
+            line-height: 1.1;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+        }
+
+        .parameters h2 {
+            text-align: center;
+            font-size: 46px;
+            margin-bottom: 42px;
+        }
+
+        .background-shell {
+            position: relative;
+            left: 50%;
+            margin-top: 24px;
+            width: min(1380px, calc(100vw - 32px));
+            transform: translateX(-50%);
+        }
+
+        .background {
+            padding: 40px 28px 8px;
+            border-radius: 18px;
+            background: linear-gradient(180deg, rgba(244, 244, 244, 0.58), rgba(247, 247, 247, 0.88));
+            width: 100%;
+        }
+
+        .background h2 {
+            text-align: center;
+            font-size: 46px;
+            margin-bottom: 46px;
+            letter-spacing: 0.01em;
+        }
+
+        .background-layout {
+            display: grid;
+            grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr);
+            align-items: stretch;
+            gap: 36px;
+        }
+
+        .background-media {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100%;
+        }
+
+        .background-media img {
+            display: block;
+            width: auto;
+            height: 100%;
+            max-width: 100%;
+            object-fit: contain;
+            object-position: center;
+        }
+
+        .params-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .param-item {
+            position: relative;
+            min-height: 175px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            padding: 26px 20px;
+            text-align: center;
+            background: linear-gradient(180deg, rgba(244, 244, 244, 0.58), rgba(247, 247, 247, 0.86));
+            transition: transform 0.22s ease, background-color 0.22s ease, box-shadow 0.22s ease;
+        }
+
+        .param-item::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.42), transparent 58%);
+            pointer-events: none;
+        }
+
+        .param-item:not(:nth-child(3n)) {
+            border-right: 1px solid rgba(15, 23, 42, 0.18);
+        }
+
+        .param-item:nth-child(-n+6) {
+            border-bottom: 1px solid rgba(15, 23, 42, 0.18);
+        }
+
+        .param-item:hover {
+            transform: translateY(-2px);
+            background: linear-gradient(180deg, rgba(248, 248, 248, 0.92), rgba(250, 250, 250, 1));
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+        }
+
+        .param-label {
+            font-size: 14px;
+            color: #8a8a8a;
+            margin-bottom: 0;
+            letter-spacing: 0;
+        }
+
+        .param-value {
+            font-size: 40px;
+            font-weight: 700;
+            color: #222;
+            line-height: 1.05;
+            text-align: center;
+        }
+
+        .background-story {
+            display: grid;
+            gap: 30px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .background-block {
+            padding: 20px 0 0;
+            border-top: 1px solid rgba(15, 23, 42, 0.14);
+        }
+
+        .background-block::before {
+            content: none;
+        }
+
+        .background-block:last-child {
+            padding-bottom: 0;
+        }
+
+        .background p {
+            max-width: none;
+            font-size: 17px;
+            line-height: 1.85;
+            color: #4a4a4a;
+            margin-bottom: 0;
+        }
+
+        .background a {
+            color: #222;
+            text-decoration: none;
+            border-bottom: 1px solid rgba(15, 23, 42, 0.18);
+        }
+
+        .background a:hover {
+            border-bottom-color: rgba(15, 23, 42, 0.45);
+        }
+
+        /* 模型可视化 */
+        .viewer-title-outside {
+            margin-top: 130px;
+            margin-bottom: 18px;
+            text-align: center;
+            font-size: 46px;
+            color: #222;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+        }
+
+        .viewer-section {
+            position: relative;
+            margin-top: 0;
+            padding: 36px 32px;
+            border-radius: 45px;
+            border: 1px solid rgba(255, 255, 255, 0.58);
+            background: rgba(255, 255, 255, 0.52);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            box-shadow:
+                0 16px 40px rgba(15, 23, 42, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.72);
+            width: min(1400px, calc(100vw - 40px));
+            margin-left: 50%;
+            transform: translateX(-50%);
+            overflow: hidden;
+        }
+
+        .viewer-section::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at top left, rgba(255, 255, 255, 0.38), transparent 24%),
+                linear-gradient(180deg, rgba(255, 255, 255, 0.32), rgba(255, 255, 255, 0.08) 36%, transparent 68%);
+            pointer-events: none;
+        }
+
+        .viewer-header {
+            margin-bottom: 22px;
+        }
+
+        .viewer-header h2 {
+            font-size: 34px;
+            color: #222;
+            margin-bottom: 6px;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+        }
+
+        .viewer-note {
+            font-size: 14px;
+            color: #8c8c8c;
+            margin-bottom: 14px;
+        }
+
+        .viewer-model {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: #f4f4f4;
+            font-size: 13px;
+            color: #444;
+        }
+
+        .viewer-shell {
+            position: relative;
+            display: grid;
+            grid-template-columns: 340px minmax(0, 1fr);
+            gap: 20px;
+            height: 700px;
+            z-index: 1;
+        }
+
+        .viewer-sidebar {
+            border-radius: 24px;
+            padding: 20px 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            height: 100%;
+            overflow-y: auto;
+            background: linear-gradient(180deg, #fcfcfd 0%, #f3f4f6 100%);
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.86),
+                inset 0 -1px 0 rgba(15, 23, 42, 0.03),
+                0 6px 18px rgba(15, 23, 42, 0.04);
+        }
+
+        .viewer-panel-title {
+            font-size: 18px;
+            color: #222;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+
+        .viewer-panel-copy {
+            font-size: 13px;
+            line-height: 1.6;
+            color: #8a8a8a;
+        }
+
+        .viewer-speed {
+            padding: 14px;
+            border-radius: 16px;
+            background: #ffffff;
+            border: 1px solid #ececec;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .viewer-speed-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .viewer-speed-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .viewer-speed-value {
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+        }
+
+        .viewer-speed-slider {
+            width: 100%;
+            accent-color: #2e2e2e;
+            cursor: ew-resize;
+        }
+
+        .viewer-speed-limits {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #999;
+        }
+
+        .joint-controls {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            grid-template-rows: repeat(3, minmax(0, auto));
+            grid-auto-flow: column;
+            gap: 12px;
+        }
+
+        .joint-card {
+            padding: 14px;
+            border-radius: 16px;
+            background: #ffffff;
+            border: 1px solid #ececec;
+            transition: border-color 0.2s, background 0.2s;
+        }
+
+        .joint-card:hover,
+        .joint-card.active {
+            border-color: #d8d8d8;
+            background: #fcfcfc;
+        }
+
+        .joint-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 12px;
+        }
+
+        .joint-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: #222;
+        }
+
+        .joint-value {
+            font-size: 13px;
+            font-weight: 600;
+            color: #666;
+            min-width: 58px;
+            text-align: right;
+        }
+
+        .joint-slider {
+            width: 100%;
+            accent-color: #2e2e2e;
+            cursor: ew-resize;
+        }
+
+        .joint-limits {
+            margin-top: 10px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #999;
+        }
+
+        .viewer-actions {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+            margin-top: auto;
+        }
+
+        .viewer-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            border: 1px solid #e5e5e5;
+            border-radius: 999px;
+            padding: 10px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s, color 0.2s;
+        }
+
+        .viewer-button:hover {
+            border-color: #cfcfcf;
+        }
+
+        .viewer-button:disabled {
+            cursor: not-allowed;
+            opacity: 0.55;
+            border-color: #e5e5e5;
+            background: #f3f4f6;
+            color: #8b8b8b;
+        }
+
+        .viewer-button.primary {
+            background: #222;
+            color: #fff;
+            border-color: #222;
+        }
+
+        .viewer-button.secondary {
+            background: #fff;
+            color: #444;
+        }
+
+        .viewer-button.viewer-toggle {
+            min-width: 92px;
+            color: #fff;
+        }
+
+        .viewer-button.viewer-toggle.toggle-start {
+            background: #2d9b49;
+            border-color: #2d9b49;
+        }
+
+        .viewer-button.viewer-toggle.toggle-stop {
+            background: #ca3a36;
+            border-color: #ca3a36;
+        }
+
+        .viewer-stage {
+            position: relative;
+            border-radius: 24px;
+            overflow: hidden;
+            height: 100%;
+            background: linear-gradient(180deg, #fbfbfc 0%, #f1f3f5 100%);
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.86),
+                inset 0 -1px 0 rgba(15, 23, 42, 0.04),
+                0 8px 20px rgba(15, 23, 42, 0.05);
+        }
+
+        .viewer-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            transition: filter 0.25s ease, transform 0.25s ease;
+        }
+
+        .viewer-stage.is-blocked .viewer-canvas {
+            filter: blur(5px);
+            transform: scale(1.04);
+        }
+
+        .viewer-stage-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(245, 247, 249, 0.42);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+            z-index: 1;
+        }
+
+        .viewer-stage.is-blocked .viewer-stage-overlay {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .viewer-status {
+            position: absolute;
+            left: 50%;
+            bottom: 20px;
+            transform: translateX(-50%);
+            padding: 10px 16px;
+            border-radius: 999px;
+            background: rgba(34, 34, 34, 0.86);
+            color: #fff;
+            font-size: 13px;
+            letter-spacing: 0.02em;
+            transition: opacity 0.25s;
+            z-index: 2;
+        }
+
+        .viewer-status.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* 产品亮点 */
+        .features {
+            margin-top: 85px;
+        }
+
+        .features h2 {
+            text-align: center;
+            font-size: 46px;
+            margin-bottom: 40px;
+            color: #222;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: stretch;
+            gap: 50px;
+            margin-bottom: 35px;
+            margin-left: -10%;
+            margin-right: -10%;
+            width: 120%;
+            background: white;
+            padding: 0;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .feature-item:nth-child(even) {
+            flex-direction: row-reverse;
+        }
+
+        .feature-item:nth-child(even) .feature-content {
+            padding: 36px 0 36px 40px;
+        }
+
+        .feature-image {
+            flex: 1.02;
+            display: flex;
+            min-height: 100%;
+            padding: 0;
+        }
+
+        .feature-item:nth-child(even) .feature-image {
+            padding: 0;
+        }
+
+        .feature-image img {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: cover;
+            border-radius: 0 14px 14px 0;
+        }
+
+        .feature-item:nth-child(even) .feature-image img {
+            border-radius: 14px 0 0 14px;
+        }
+
+        .feature-content {
+            flex: 0.89;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 36px 40px 36px 0;
+        }
+
+        .feature-content h3 {
+            font-size: 40px;
+            margin-bottom: 24px;
+            color: #222;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+        }
+
+        .feature-content p {
+            font-size: 22px;
+            line-height: 1.8;
+            color: #666;
+        }
+
+        /* 展示视频 */
+        .video-section {
+            position: relative;
+            margin-top: 85px;
+            width: min(1800px, calc(100vw - 40px));
+            margin-left: 50%;
+            transform: translateX(-50%);
+            padding: 48px 32px 72px;
+        }
+
+        .video-section-inner {
+            position: relative;
+            width: 100%;
+            max-width: none;
+            margin: 0 auto;
+            z-index: 1;
+        }
+
+        .video-head {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .video-title {
+            color: #222;
+            font-family: 'Outfit', sans-serif;
+            font-size: 46px;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            line-height: 1.2;
+            text-align: center;
+        }
+
+        .video-title-break {
+            display: none;
+        }
+
+        .video-carousel {
+            width: min(1386px, calc(100vw - 64px));
+            position: relative;
+            aspect-ratio: 16 / 9;
+            height: auto;
+            margin-top: 32px;
+            margin-left: auto;
+            margin-right: auto;
+            overflow: hidden;
+        }
+
+        .video-slide {
+            width: 100%;
+            height: 100%;
+        }
+
+        .video-slide-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            aspect-ratio: 16 / 9;
+            overflow: hidden;
+            background: #000;
+            border-radius: 16px;
+        }
+
+        .video-cover-shell,
+        .video-cover-image,
+        .video-player-frame {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .video-cover-image {
+            object-fit: cover;
+        }
+
+        .video-cover-shell {
+            display: block;
+            width: 100%;
+            height: 100%;
+            border: 0;
+            padding: 0;
+            background: transparent;
+            cursor: pointer;
+            transition: opacity 0.16s ease, visibility 0.16s ease;
+            z-index: 2;
+        }
+
+        .video-cover-shell.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+
+        .video-cover-play {
+            position: absolute;
+            z-index: 1;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 999px;
+            width: 122px;
+            height: 122px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            background: rgba(34, 34, 34, 0.72);
+            border: 1px solid var(--video-border-inverse);
+            box-shadow: 0 16px 36px rgba(0, 0, 0, 0.22);
+            backdrop-filter: blur(8px);
+        }
+
+        .video-cover-play svg {
+            width: 70px;
+            height: 70px;
+            display: block;
+            fill: #fff;
+            transform: translateX(1px);
+        }
+
+        .video-player-frame {
+            border: 0;
+            background: #000;
+            z-index: 1;
+            opacity: 1;
+        }
+
+        .video-player-frame.is-ready {
+            opacity: 1;
+        }
+
+        .video-section .custom-video-controls,
+        .video-section .video-cover-shell {
+            display: none;
+        }
+
+        .video-media-hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .video-cta-wrap {
+            display: flex;
+            justify-content: flex-end;
+            width: min(1200px, calc(100vw - 64px));
+            margin: 22px auto 0;
+        }
+
+        .video-cta {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 12px;
+            padding: 14px 24px 14px 18px;
+            border-radius: 999px;
+            border: 1px solid var(--video-border-inverse);
+            background: #111;
+            backdrop-filter: blur(6px);
+            overflow: hidden;
+            text-decoration: none;
+            position: relative;
+            transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .video-cta::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(115deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.01) 65%);
+            opacity: 1;
+            transition: opacity 0.25s ease;
+        }
+
+        .video-cta:hover {
+            border-color: rgba(255, 255, 255, 0.34);
+            transform: translateY(-2px);
+            box-shadow: 0 14px 28px rgba(15, 23, 42, 0.16);
+        }
+
+        .video-cta:hover::before {
+            opacity: 0.88;
+        }
+
+        .video-cta-icon,
+        .video-cta-text,
+        .video-cta-arrow {
+            position: relative;
+            z-index: 1;
+        }
+
+        .video-cta-icon {
+            width: 30px;
+            height: 21px;
+            color: #fff;
+            flex: 0 0 auto;
+        }
+
+        .video-cta-text {
+            color: #fff;
+            font-family: 'Outfit', sans-serif;
+            font-size: 18px;
+            font-weight: 400;
+            line-height: 1.2;
+            letter-spacing: 0.02em;
+        }
+
+        .video-cta-arrow {
+            width: 14px;
+            height: 14px;
+            border-top: 2px solid #f3f4f6;
+            border-right: 2px solid #f3f4f6;
+            transform: translateY(2px) rotate(-45deg);
+        }
+
+        .video-cta:hover .video-cta-arrow {
+            transform: translateY(2px) rotate(-45deg);
+        }
+
+        .demo-video-cta {
+            min-height: 56px;
+            padding: 13px 20px 13px 16px;
+        }
+
+        .demo-video-cta .video-cta-icon {
+            width: 26px;
+            height: 18px;
+        }
+
+        .demo-video-cta .video-cta-text {
+            font-size: 16px;
+            white-space: nowrap;
+        }
+
+        .language-dropdown {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .language-dropdown::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: -16px;
+            right: -16px;
+            height: 15px;
+        }
+
+        .language-trigger {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            padding: 0;
+            margin: 0;
+            border: 0;
+            line-height: 1;
+            background: transparent;
+            cursor: pointer;
+            opacity: 1;
+            transition: opacity 0.3s;
+            flex-shrink: 0;
+        }
+
+        .language-trigger:hover {
+            opacity: 0.6;
+        }
+
+        .language-trigger img {
+            width: auto;
+            height: auto;
+            max-width: 23px;
+            max-height: 23px;
+            display: block;
+        }
+
+        .language-content {
+            display: none !important;
+            min-width: 150px;
+        }
+
+        .language-option {
+            width: 100%;
+            padding: 12px 24px;
+            border: 0;
+            background: transparent;
+            color: #333;
+            text-align: left;
+            font-size: 16px;
+            font-family: inherit;
+            cursor: default;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .language-option:hover,
+        .language-option:focus,
+        .language-option:active {
+            background: #ebebeb;
+            color: #333;
+            outline: none;
+        }
+
+
+        /* Demo Cases */
+        .demo-cases {
+            position: relative;
+            width: 100vw;
+            margin-top: 34px;
+            margin-left: 50%;
+            transform: translateX(-50%);
+            padding: 34px 0 150px;
+            overflow: hidden;
+        }
+
+        .demo-cases-head {
+            width: min(1200px, calc(100vw - 64px));
+            margin: 0 auto 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 18px;
+        }
+
+        .demo-cases-title {
+            margin: 0;
+            color: #222;
+            font-family: 'Outfit', sans-serif;
+            font-size: 46px;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            line-height: 1.2;
+        }
+
+        .demo-case-actions {
+            display: flex;
+            gap: 12px;
+            flex: 0 0 auto;
+            align-items: center;
+        }
+
+        .demo-case-actions {
+            position: absolute;
+            top: 34px;
+            right: max(8px, calc((100vw - 1200px) / 2 - 150px));
+        }
+
+        .demo-case-btn {
+            width: 56px;
+            height: 56px;
+            border: 1px solid rgba(17, 17, 17, 0.14);
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.78);
+            color: #1f2933;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            font-size: 0;
+            line-height: 0;
+            cursor: pointer;
+            transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .demo-case-btn:hover {
+            background: #fff;
+            border-color: rgba(17, 17, 17, 0.28);
+            transform: translateY(-1px);
+        }
+
+        .demo-case-btn::before {
+            content: "";
+            width: 14px;
+            height: 14px;
+            border-top: 2px solid currentColor;
+            border-right: 2px solid currentColor;
+            display: block;
+        }
+
+        .demo-case-prev::before {
+            transform: translateX(2px) rotate(-135deg);
+        }
+
+        .demo-case-next::before {
+            transform: translateX(-2px) rotate(45deg);
+        }
+
+        .demo-case-btn:disabled {
+            color: #a8adb5;
+            border-color: rgba(17, 17, 17, 0.08);
+            background: rgba(245, 246, 248, 0.72);
+            cursor: not-allowed;
+            transform: none;
+            opacity: 0.56;
+        }
+
+        .demo-case-viewport {
+            width: 100%;
+            overflow: hidden;
+            padding: 18px 0 26px;
+            cursor: grab;
+        }
+
+        .demo-case-viewport.is-dragging {
+            cursor: grabbing;
+        }
+
+        .demo-case-viewport.is-dragging .demo-case-track {
+            transition: none;
+        }
+
+        .demo-case-track {
+            display: flex;
+            align-items: center;
+            gap: clamp(10px, 1.35vw, 24px);
+            padding: 0 calc((100vw - min(1200px, calc(100vw - 64px))) / 2);
+            transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+            will-change: transform;
+        }
+
+        .demo-case-card {
+            position: relative;
+            flex: 0 0 clamp(660px, 78.375vw, 1155px);
+            transform: none;
+            transform-origin: center center;
+            opacity: 0.82;
+            transition: opacity 0.35s ease;
+            cursor: pointer;
+        }
+
+        .demo-case-card.is-active {
+            transform: none;
+            opacity: 1;
+            z-index: 3;
+            cursor: default;
+        }
+
+        .demo-case-card.is-neighbor {
+            opacity: 0.9;
+            z-index: 2;
+        }
+
+        .demo-case-card.is-distant {
+            opacity: 0.62;
+            z-index: 1;
+        }
+
+        .demo-case-video {
+            position: relative;
+            aspect-ratio: 16 / 9;
+            border-radius: 0;
+            overflow: hidden;
+            background: #000;
+            box-shadow: none;
+        }
+
+        .demo-case-video::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            background: rgba(0, 0, 0, 0.48);
+            pointer-events: none;
+            transition: opacity 0.35s ease;
+        }
+
+        .demo-case-card.is-active .demo-case-video::after {
+            opacity: 0;
+        }
+
+        .demo-case-video video {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: cover;
+            filter: blur(4.5px);
+            transition: filter 0.35s ease;
+        }
+
+        .demo-case-card.is-active .demo-case-video video {
+            filter: none;
+        }
+
+        .demo-case-card:not(.is-active) .demo-case-video video {
+            pointer-events: none;
+        }
+
+        .demo-case-card:not(.is-active) .custom-video-controls {
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+
+        .demo-case-video .custom-video-controls {
+            z-index: 3;
+        }
+
+        .demo-case-label {
+            display: none;
+        }
+
+        .demo-case-caption {
+            min-height: 26px;
+            margin-top: 8px;
+            color: #5f6673;
+            font-size: 20px;
+            font-weight: 500;
+            text-align: center;
+            letter-spacing: 0.02em;
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity 0.18s ease, transform 0.18s ease;
+        }
+
+        .demo-case-caption.is-hidden {
+            opacity: 0;
+            transform: translateY(4px);
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .navbar {
+                width: 95%;
+                padding: 10px 15px;
+            }
+
+            .navbar-brand {
+                font-size: 18px;
+            }
+
+            .navbar-links {
+                gap: 15px;
+            }
+
+            .navbar-links a {
+                font-size: 14px
+            }
+
+            .viewer-section {
+                padding: 28px 20px;
+                border-radius: 28px;
+                width: auto;
+                margin-left: 0;
+                transform: none;
+            }
+
+            .viewer-title-outside {
+                font-size: 28px;
+            }
+
+            .viewer-shell {
+                grid-template-columns: 1fr;
+                height: auto;
+                min-height: auto;
+            }
+
+            .viewer-stage {
+                min-height: 420px;
+            }
+
+            .joint-controls {
+                grid-template-columns: 1fr;
+                grid-template-rows: none;
+                grid-auto-flow: row;
+            }
+
+            .video-section {
+                width: 100vw;
+                margin-top: 28px;
+                margin-left: 50%;
+                transform: translateX(-50%);
+                padding: 40px 16px 48px;
+            }
+
+            .video-section-inner {
+                max-width: none;
+            }
+
+            .video-head {
+                align-items: center;
+            }
+
+            .video-title {
+                font-size: 32px;
+            }
+
+            .video-title-break {
+                display: none;
+            }
+
+            .video-carousel {
+                width: 100%;
+                height: auto;
+                aspect-ratio: 16 / 9;
+                margin-top: 28px;
+            }
+
+            .video-slide-inner {
+                width: 100%;
+            }
+
+            .demo-cases {
+                width: 100vw;
+                margin-top: 22px;
+                padding: 26px 0 62px;
+            }
+
+            .demo-cases-head {
+                width: calc(100vw - 32px);
+                margin-bottom: 18px;
+            }
+
+            .demo-cases-title {
+                font-size: 32px;
+            }
+
+            .demo-case-btn {
+                width: 48px;
+                height: 48px;
+                font-size: 30px;
+            }
+
+            .demo-case-track {
+                gap: 12px;
+                padding: 0 16px;
+            }
+
+            .demo-case-card {
+                flex-basis: min(96vw, 742px);
+                transform: none;
+            }
+
+            .demo-case-video {
+                border-radius: 0;
+            }
+
+            .video-cover-play {
+                width: 72px;
+                height: 72px;
+                font-size: 13px;
+            }
+
+            .video-cta-wrap {
+                position: static;
+                transform: none;
+            }
+
+            .video-cta {
+                width: 100%;
+                gap: 8px;
+                padding: 14px 18px;
+            }
+
+            .video-cta-text {
+                font-size: 18px;
+            }
+
+            .overview-grid {
+                gap: 32px;
+            }
+
+            .parameters,
+            .background {
+                padding: 0;
+                border-radius: 0;
+            }
+
+            .parameters h2,
+            .background h2 {
+                font-size: 28px;
+            }
+
+            .parameters h2 {
+                font-size: 34px;
+                margin-bottom: 24px;
+            }
+
+            .background {
+                padding: 16px 12px 2px;
+                border-radius: 14px;
+                width: auto;
+            }
+
+            .background-shell {
+                position: static;
+                left: auto;
+                margin-top: 20px;
+                width: auto;
+                transform: none;
+            }
+
+            .background h2 {
+                margin-bottom: 24px;
+                font-size: 30px;
+            }
+
+            .background-layout {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+
+            .background-media {
+                min-height: 0;
+            }
+
+            .background-media img {
+                width: 100%;
+                height: auto;
+                max-height: none;
+            }
+
+            .params-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .param-item {
+                min-height: 130px;
+                padding: 19px 13px;
+                gap: 6px;
+            }
+
+            .param-item:not(:nth-child(3n)) {
+                border-right: none;
+            }
+
+            .param-item:nth-child(-n+6) {
+                border-bottom: none;
+            }
+
+            .param-item:not(:nth-child(2n)) {
+                border-right: 1px solid rgba(15, 23, 42, 0.18);
+            }
+
+            .param-item:nth-child(-n+8) {
+                border-bottom: 1px solid rgba(15, 23, 42, 0.18);
+            }
+
+            .param-label {
+                font-size: 13px;
+            }
+
+            .param-value {
+                font-size: 30px;
+            }
+
+            .background-story {
+                gap: 22px;
+                max-width: none;
+            }
+
+            .feature-item {
+                flex-direction: column !important;
+                gap: 0;
+                width: 100%;
+                margin-left: 0;
+                margin-right: 0;
+            }
+
+            .feature-image {
+                width: 100%;
+                min-height: 0;
+                padding: 0;
+            }
+
+            .feature-image img {
+                aspect-ratio: 16 / 10;
+                border-radius: 0 0 14px 14px;
+            }
+
+            .feature-content {
+                padding: 24px 22px 28px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 顶部导航栏 -->
+    <nav class="navbar">
+        <a href="#top" class="navbar-brand" id="nav-brand-top">Panthera-HT</a>
+        <div class="navbar-links">
+            <a href="https://alidocs.dingtalk.com/i/nodes/gwva2dxOW4zEmDq5FkeerMdwJbkz3BRL" target="_blank" rel="noopener noreferrer" class="navbar-link-strong">DATABASE</a>
+            <a href="guide_en.html" target="_blank" rel="noopener noreferrer" class="navbar-link-strong">GUIDE</a>
+            <a href="https://github.com/HighTorque-Robotics/Panthera-HT_Main" target="_blank"
+                class="navbar-link-strong">GITHUB</a>
+            <a href="https://www.hightorquerobotics.com/" target="_blank" class="navbar-link-strong">CONTACT</a>
+            <button type="button" class="language-trigger" onclick="location.href='index.html'" title="切换到中文"
+                aria-label="切换到中文">
+                <img src="images/icon2.png" alt="Language">
+            </button>
+            <a href="https://store.hightorque.cn/products/panthera-ht-6-dof-robotic-arm" target="_blank"
+                class="btn-buy">BUY</a>
+        </div>
+    </nav>
+
+    <!-- 首页大图 -->
+    <section class="hero">
+        <img src="images/英文首页3.png?v=20260710-truecolor" alt="Panthera-HT Robotic Arm">
+    </section>
+
+    <!-- 参数展示 -->
+    <div class="container">
+        <div class="overview-grid">
+            <section class="parameters">
+                <h2>Specifications</h2>
+                <div class="params-grid">
+                    <div class="param-item">
+                        <div class="param-label">DOF</div>
+                        <div class="param-value" data-target="6" data-suffix="dof">0dof</div>
+                    </div>
+                    <div class="param-item">
+                        <div class="param-label">Weight</div>
+                        <div class="param-value" data-target="4.35" data-suffix="kg">0kg</div>
+                    </div>
+                    <div class="param-item">
+                        <div class="param-label">Maximum static load</div>
+                        <div class="param-value" data-target="3.5" data-suffix="kg">0kg</div>
+                    </div>
+                    <div class="param-item">
+                        <div class="param-label">Reach</div>
+                        <div class="param-value" data-target="860" data-suffix="mm">0mm</div>
+                    </div>
+                    <div class="param-item">
+                        <div class="param-label">Folded Length</div>
+                        <div class="param-value" data-target="460" data-suffix="mm">0mm</div>
+                    </div>
+                    <div class="param-item">
+                        <div class="param-label">Max TCP Speed</div>
+                        <div class="param-value" data-target="0.8" data-suffix="m/s">0m/s</div>
+                    </div>
+                    <div class="param-item">
+                        <div class="param-label">Repeatability</div>
+                        <div class="param-value" data-target="0.1" data-suffix="mm">0mm</div>
+                    </div>
+                    <div class="param-item">
+                        <div class="param-label">Communication</div>
+                        <div class="param-value">CAN-FD</div>
+                    </div>
+                    <div class="param-item">
+                        <div class="param-label">Peak Joint Torque</div>
+                        <div class="param-value" data-target="36" data-suffix="Nm">0Nm</div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+
+        <div class="background-shell">
+            <div class="overview-separator" aria-hidden="true"></div>
+
+            <section class="background">
+                <h2>Project Background</h2>
+                <div class="background-layout">
+                    <div class="background-media">
+                        <img src="images/background.jpg" alt="Panthera-HT Project Background">
+                    </div>
+                    <div class="background-story">
+                        <div class="background-block">
+                            <p>The Panthera-HT project was born from a desire to make high-performance joint-motor
+                                robotic arms accessible to students at a lower price.<br>
+                                Its predecessor, the Panthera robotic arm, was a 6-axis gripper arm based on DM
+                                actuators. The initial concept was proposed by wEch1ng (<a
+                                    href="https://github.com/wEch1ng" target="_blank">https://github.com/wEch1ng</a>),
+                                who collaborated with KelvinLauMiau to share responsibilities in design, implementation,
+                                debugging, and hardware validation, ultimately completing and open-sourcing the Panthera
+                                arm.</p>
+                        </div>
+                        <div class="background-block">
+                            <p>The original authors later joined forces with HighTorque Robotics, and with HighTorque's
+                                support, the project was refined and commercialized as Panthera-HT — a more complete
+                                maker product. We remain committed to open-source principles with no restrictions on the
+                                project.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- 产品亮点 -->
+        <section class="features">
+            <h2>Features</h2>
+
+            <div class="feature-item">
+                <div class="feature-image">
+                    <img src="images/特点图片/1.jpg" alt="Precise Control">
+                </div>
+                <div class="feature-content">
+                    <h3>Precise Control, Efficient Operation</h3>
+                    <p>Leveraging motion control algorithms and high-precision sensing, the arm achieves 0.1mm
+                        repeatability — delivering greater stability and accuracy for alignment, grasping, and
+                        continuous trajectory tasks.</p>
+                </div>
+            </div>
+
+            <div class="feature-item">
+                <div class="feature-image">
+                    <img src="images/特点图片/2.jpg" alt="Outstanding Reach">
+                </div>
+                <div class="feature-content">
+                    <h3>Outstanding Reach, Maximum Flexibility</h3>
+                    <p>A lightweight 6-axis design combined with an 860mm extended reach delivers greater spatial
+                        coverage, allowing the arm to move freely and fluidly even in complex environments.</p>
+                </div>
+            </div>
+
+            <div class="feature-item">
+                <div class="feature-image">
+                    <img src="images/特点图片/3.jpg" alt="Durable Build">
+                </div>
+                <div class="feature-content">
+                    <h3>Clean Design, Built to Last</h3>
+                    <p>The overall design balances aesthetic consistency with structural integrity. The aluminum alloy
+                        body combines good looks, strength, and durability for long-term reliable use.</p>
+                </div>
+            </div>
+
+            <div class="feature-item">
+                <div class="feature-image">
+                    <img src="images/特点图片/4.jpg" alt="Open Source">
+                </div>
+                <div class="feature-content">
+                    <h3>Open Source, Developer Friendly</h3>
+                    <p>Compatible with ROS2 and LeRobot, supporting C++ and Python development. URDF models and
+                        simulation support are included, making it easy to get started with research, education, and
+                        custom development.</p>
+                </div>
+            </div>
+        </section>
+
+        <h2 class="viewer-title-outside">Model Viewer</h2>
+        <section class="viewer-section" id="viewer">
+            <div class="viewer-shell">
+                <aside class="viewer-sidebar">
+                    <div>
+                        <p class="viewer-panel-copy">Drag joints on the model directly, or use the Joint1 to Joint6
+                            sliders to adjust the pose.
+                        </p>
+                    </div>
+                    <div class="viewer-speed">
+                        <div class="viewer-speed-header">
+                            <span class="viewer-speed-label">Joint speed</span>
+                            <span class="viewer-speed-value" id="joint-speed-value">120掳/s</span>
+                        </div>
+                        <input class="viewer-speed-slider" id="joint-speed" type="range" min="30" max="360" step="10"
+                            value="120" aria-label="Joint speed">
+                        <div class="viewer-speed-limits">
+                            <span>30</span>
+                            <span>360</span>
+                        </div>
+                    </div>
+                    <div class="joint-controls" id="joint-controls"></div>
+                    <div class="viewer-actions">
+                        <button class="viewer-button viewer-toggle toggle-start" id="viewer-toggle"
+                            aria-pressed="false">START</button>
+                        <button class="viewer-button secondary" id="viewer-home">Reset View</button>
+                        <button class="viewer-button primary" id="viewer-reset">Zero Pos</button>
+                    </div>
+                </aside>
+
+                <div class="viewer-stage is-blocked" id="viewer-stage">
+                    <canvas id="viewer-canvas" class="viewer-canvas"></canvas>
+                    <div class="viewer-stage-overlay" aria-hidden="true"></div>
+                    <div class="viewer-status" id="viewer-status">Loading URDF and STL models...</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 展示视频 -->
+        <section class="video-section">
+            <div class="video-section-inner">
+                <div class="video-head">
+                    <h2 class="video-title">Product Videos</h2>
+                </div>
+                <div class="video-carousel" id="video-carousel">
+                    <article class="video-slide" data-index="0"
+                        data-page-url="https://www.bilibili.com/video/BV1Bc9aBnEKS">
+                        <div class="video-slide-inner custom-video-wrap">
+                            <button type="button" class="video-cover-shell" aria-label="Play video 1">
+                                <img class="video-cover-image" src="images/视频封面/main.png" alt="Video 1 cover"
+                                    loading="lazy" referrerpolicy="no-referrer">
+                                <span class="video-cover-play" aria-hidden="true"><svg viewBox="0 0 24 24"
+                                        focusable="false">
+                                        <path d="M8 5v14l11-7z" />
+                                    </svg></span>
+                            </button>
+                            <video class="video-player-frame custom-video video-media-hidden"
+                                data-src="video/main_en.mp4?v=20260710-smaller" title="Panthera-HT Video 1" playsinline
+                                preload="metadata"></video>
+                            <div class="custom-video-controls">
+                                <button class="custom-video-toggle" type="button" aria-label="Play video"
+                                    aria-pressed="false">▶</button>
+                                <input class="custom-video-progress" type="range" min="0" max="100" step="0.01"
+                                    value="0" aria-label="Video progress">
+                                <span class="custom-video-time">0:00 / 0:00</span>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- Development Cases -->
+        <section class="demo-cases" aria-labelledby="demo-cases-title">
+            <div class="demo-cases-head">
+                <h2 class="demo-cases-title" id="demo-cases-title">Development Cases</h2>
+                <div class="demo-case-actions" aria-label="Development case navigation">
+                    <button class="demo-case-btn demo-case-prev" type="button" aria-label="Previous case"></button>
+                    <button class="demo-case-btn demo-case-next" type="button" aria-label="Next case"></button>
+                    <a class="video-cta demo-video-cta" id="video-cta-link" href="https://x.com/HTrobotics"
+                        target="_blank" rel="noopener noreferrer" aria-label="Open Bilibili channel in a new window">
+                        <svg class="video-cta-icon" viewBox="0 0 40 28" aria-hidden="true">
+                            <path
+                                d="M15.71 20.08V7.92L25.72 14L15.71 20.08ZM34.94 3.01C32.95 2.48 24.97 2.48 20 2.48C15.03 2.48 7.05 2.48 5.06 3.01C3.31 3.48 1.93 4.86 1.46 6.61C0.93 8.6 0.93 12.74 0.93 14C0.93 15.26 0.93 19.4 1.46 21.39C1.93 23.14 3.31 24.52 5.06 24.99C7.05 25.52 15.03 25.52 20 25.52C24.97 25.52 32.95 25.52 34.94 24.99C36.69 24.52 38.07 23.14 38.54 21.39C39.07 19.4 39.07 15.26 39.07 14C39.07 12.74 39.07 8.6 38.54 6.61C38.07 4.86 36.69 3.48 34.94 3.01Z"
+                                fill="currentColor" />
+                        </svg>
+                        <span class="video-cta-text">Watch on X</span>
+                        <span class="video-cta-arrow" aria-hidden="true"></span>
+                    </a>
+                </div>
+            </div>
+            <div class="demo-case-viewport">
+                <div class="demo-case-track">
+                    <article class="demo-case-card" data-demo-index="0">
+                        <div class="demo-case-video custom-video-wrap">
+                            <video class="custom-video" src="video/demo_en/demo1.mp4?v=20260710-1080p" playsinline
+                                preload="metadata"></video>
+                            <div class="custom-video-controls">
+                                <button class="custom-video-toggle" type="button" aria-label="Play video"
+                                    aria-pressed="false">▶</button>
+                                <input class="custom-video-progress" type="range" min="0" max="100" step="0.01"
+                                    value="0" aria-label="Video progress">
+                                <span class="custom-video-time">0:00 / 0:00</span>
+                            </div>
+                        </div>
+                        <div class="demo-case-label">Visual tracking of a blue circular object</div>
+                    </article>
+                    <article class="demo-case-card is-active" data-demo-index="1">
+                        <div class="demo-case-video custom-video-wrap">
+                            <video class="custom-video" src="video/demo_en/demo2.mp4?v=20260710-1080p" playsinline
+                                preload="metadata"></video>
+                            <div class="custom-video-controls">
+                                <button class="custom-video-toggle" type="button" aria-label="Play video"
+                                    aria-pressed="false">▶</button>
+                                <input class="custom-video-progress" type="range" min="0" max="100" step="0.01"
+                                    value="0" aria-label="Video progress">
+                                <span class="custom-video-time">0:00 / 0:00</span>
+                            </div>
+                        </div>
+                        <div class="demo-case-label">GraspNet grasp pose estimation</div>
+                    </article>
+                    <article class="demo-case-card" data-demo-index="2">
+                        <div class="demo-case-video custom-video-wrap">
+                            <video class="custom-video" src="video/demo_en/demo3.mp4?v=20260710-1080p" playsinline
+                                preload="metadata"></video>
+                            <div class="custom-video-controls">
+                                <button class="custom-video-toggle" type="button" aria-label="Play video"
+                                    aria-pressed="false">▶</button>
+                                <input class="custom-video-progress" type="range" min="0" max="100" step="0.01"
+                                    value="0" aria-label="Video progress">
+                                <span class="custom-video-time">0:00 / 0:00</span>
+                            </div>
+                        </div>
+                        <div class="demo-case-label">OpenClaw + robotic arm</div>
+                    </article>
+                </div>
+            </div>
+            <div class="demo-case-caption" aria-live="polite">GraspNet grasp pose estimation</div>
+        </section>
+    </div>
+
+    <!-- LeRobot AI Workflow -->
+    <section class="lerobot-section">
+        <style>
+            .lerobot-section {
+                width: 100vw;
+                margin-left: 50%;
+                transform: translateX(-50%);
+                box-sizing: border-box;
+                background: linear-gradient(180deg, #f5f5f5 0%, #e8e8e8 15px, #c8c8c8 30px, #999999 45px, #6a6a6a 60px, #505050 70px, #383838 80px, #2a2a2a 90px, #1e1e1e 100px, #141414 110px);
+                margin-top: 0px;
+                padding: 190px 24px 80px;
+                color: #e8e8ed;
+            }
+
+            .lerobot-inner {
+                max-width: 1200px;
+                margin: 0 auto;
+                zoom: 1.1;
+            }
+
+            .lerobot-header {
+                text-align: center;
+                margin-bottom: 72px;
+            }
+
+            .lerobot-title {
+                font-family: 'Outfit', sans-serif;
+                font-size: 42px;
+                font-weight: 700;
+                letter-spacing: -0.02em;
+                margin: 0 0 12px;
+                color: #f0f0f5;
+            }
+
+            .lerobot-subtitle {
+                font-size: 17px;
+                color: #8b8b98;
+                margin: 0;
+                font-weight: 400;
+            }
+
+            .lerobot-flow {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 20px;
+                margin-bottom: 67px;
+                transform: scale(1.0);
+                transform-origin: center top;
+            }
+
+            .lerobot-flow-step {
+                background: #1f1f25;
+                border-radius: 16px;
+                overflow: hidden;
+            }
+
+            .lerobot-flow-step img {
+                width: 100%;
+                aspect-ratio: 16 / 10;
+                object-fit: cover;
+                display: block;
+            }
+
+            .lerobot-flow-label {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 16px 20px;
+                font-size: 16px;
+                font-weight: 500;
+                color: #a0a0ac;
+            }
+
+            .lerobot-flow-label .arrow {
+                color: #555;
+                margin-left: auto;
+            }
+
+            .lerobot-flow-step:last-child .lerobot-flow-label .arrow {
+                display: none;
+            }
+
+            .lerobot-flow-step .step-num {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 22px;
+                height: 22px;
+                border-radius: 50%;
+                background: #2a2a32;
+                font-size: 12px;
+                font-weight: 600;
+                color: #7db9f8;
+                flex: 0 0 auto;
+            }
+
+            .lerobot-video-wrap {
+                position: relative;
+                margin-bottom: 72px;
+                border-radius: 16px;
+                overflow: hidden;
+                background: #000;
+                aspect-ratio: 16 / 9;
+                box-shadow: 0 0 22px rgba(125, 185, 248, 0.35);
+            }
+
+            .lerobot-video-wrap video {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                display: block;
+            }
+
+            .custom-video-wrap {
+                position: relative;
+            }
+
+            .custom-video-controls {
+                position: absolute;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 10px 14px;
+                background: linear-gradient(to top,
+                        rgba(0, 0, 0, 0.62) 0%,
+                        rgba(0, 0, 0, 0.62) 10%,
+                        rgba(0, 0, 0, 0.61) 20%,
+                        rgba(0, 0, 0, 0.60) 30%,
+                        rgba(0, 0, 0, 0.58) 40%,
+                        rgba(0, 0, 0, 0.55) 50%,
+                        rgba(0, 0, 0, 0.51) 60%,
+                        rgba(0, 0, 0, 0.45) 70%,
+                        rgba(0, 0, 0, 0.38) 78%,
+                        rgba(0, 0, 0, 0.30) 85%,
+                        rgba(0, 0, 0, 0.22) 90%,
+                        rgba(0, 0, 0, 0.14) 94%,
+                        rgba(0, 0, 0, 0.08) 97%,
+                        rgba(0, 0, 0, 0.03) 99%,
+                        rgba(0, 0, 0, 0) 100%);
+                z-index: 3;
+                opacity: 0;
+                pointer-events: none;
+                cursor: pointer;
+                transition: opacity 0.18s ease;
+            }
+
+            .custom-video-wrap.show-controls .custom-video-controls,
+            .custom-video-wrap.is-seeking .custom-video-controls,
+            .custom-video-wrap:hover .custom-video-controls {
+                opacity: 1;
+                pointer-events: auto;
+            }
+
+            .custom-video-toggle {
+                width: 30px;
+                height: 30px;
+                border: 0;
+                border-radius: 6px;
+                background: transparent;
+                color: #f0f0f5;
+                font-size: 14px;
+                line-height: 1;
+                cursor: pointer;
+                flex: 0 0 auto;
+            }
+
+            .custom-video-toggle:hover {
+                background: rgba(255, 255, 255, 0.12);
+            }
+
+            .custom-video-progress {
+                width: 100%;
+                accent-color: #7db9f8;
+                cursor: pointer;
+            }
+
+            .custom-video-time {
+                min-width: 92px;
+                color: #d7d7dc;
+                font-size: 13px;
+                font-variant-numeric: tabular-nums;
+                text-align: right;
+                flex: 0 0 auto;
+            }
+
+            .custom-video-volume {
+                width: 78px;
+                accent-color: #7db9f8;
+                cursor: pointer;
+                flex: 0 0 auto;
+            }
+
+            .lerobot-cards {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 20px;
+                margin-bottom: 64px;
+            }
+
+            .lerobot-card {
+                background: #1f1f25;
+                border-radius: 16px;
+                padding: 28px 24px 32px;
+            }
+
+            .lerobot-card h3 {
+                font-family: 'Outfit', sans-serif;
+                font-size: 18px;
+                font-weight: 600;
+                margin: 0 0 10px;
+                color: #f0f0f5;
+            }
+
+            .lerobot-card p {
+                font-size: 14px;
+                line-height: 1.6;
+                color: #8b8b98;
+                margin: 0;
+            }
+
+            .lerobot-card .card-icon {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 40px;
+                height: 40px;
+                border-radius: 10px;
+                background: #2a2a32;
+                margin-bottom: 16px;
+                font-size: 18px;
+            }
+
+            .lerobot-code {
+                background: #1f1f25;
+                border-radius: 16px;
+                padding: 24px 28px;
+                margin-bottom: 48px;
+                font-family: 'SFMono-Regular', 'Consolas', monospace;
+                font-size: 14px;
+                line-height: 1.7;
+                color: #c0c0cc;
+                overflow-x: auto;
+            }
+
+            .lerobot-code .keyword {
+                color: #7db9f8;
+            }
+
+            .lerobot-code .string {
+                color: #a8d5a2;
+            }
+
+            .lerobot-code .comment {
+                color: #6a6a76;
+            }
+
+            .lerobot-cta {
+                display: flex;
+                gap: 16px;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .lerobot-cta a {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                padding: 12px 28px;
+                border-radius: 999px;
+                font-size: 15px;
+                font-weight: 500;
+                text-decoration: none;
+                transition: transform 0.2s ease, box-shadow 0.2s ease;
+            }
+
+            .lerobot-cta a:hover {
+                transform: translateY(-2px);
+            }
+
+            .lerobot-cta .btn-primary {
+                background: #7db9f8;
+                color: #0a0a0c;
+            }
+
+            .lerobot-cta .btn-secondary {
+                border: 1px solid #333;
+                color: #c0c0cc;
+                background: transparent;
+            }
+
+            .lerobot-cta .btn-secondary:hover {
+                background: #1e1e24;
+                border-color: #555;
+            }
+
+            .lerobot-reveal {
+                opacity: 0;
+                transform: translateY(48px);
+                transition: opacity 0.7s ease, transform 0.7s ease;
+                transition-delay: var(--lerobot-delay, 0ms);
+            }
+
+            .lerobot-section.is-visible .lerobot-reveal {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            @media (prefers-reduced-motion: reduce) {
+                .lerobot-reveal {
+                    opacity: 1;
+                    transform: none;
+                    transition: none;
+                }
+            }
+
+            @media (max-width: 860px) {
+
+                .lerobot-flow,
+                .lerobot-cards {
+                    grid-template-columns: 1fr;
+                }
+
+                .lerobot-title {
+                    font-size: 30px;
+                }
+            }
+        </style>
+
+        <div class="lerobot-inner">
+            <div class="lerobot-header lerobot-reveal" style="--lerobot-delay: 0ms;">
+                <h2 class="lerobot-title">LeRobot-Ready AI Workflow</h2>
+                <p class="lerobot-subtitle">From data collection to policy deployment — no extra adapter work</p>
+            </div>
+
+            <div class="lerobot-flow lerobot-reveal" style="--lerobot-delay: 90ms;">
+                <div class="lerobot-flow-step">
+                    <img src="images/lerobot/1.png" alt="Data collection" loading="lazy">
+                    <div class="lerobot-flow-label">
+                        <span class="step-num">1</span>
+                        <span>Data Collection</span>
+                        <span class="arrow">→</span>
+                    </div>
+                </div>
+                <div class="lerobot-flow-step">
+                    <img src="images/lerobot/2.png" alt="Policy training" loading="lazy">
+                    <div class="lerobot-flow-label">
+                        <span class="step-num">2</span>
+                        <span>Policy Training</span>
+                        <span class="arrow">→</span>
+                    </div>
+                </div>
+                <div class="lerobot-flow-step">
+                    <img src="images/lerobot/3.png" alt="Deployment" loading="lazy">
+                    <div class="lerobot-flow-label">
+                        <span class="step-num">3</span>
+                        <span>Real-World Deployment</span>
+                        <span class="arrow">→</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lerobot-video-wrap custom-video-wrap lerobot-reveal" style="--lerobot-delay: 170ms;">
+                <video class="custom-video" src="video/lerobot_en.mp4?v=20260710-smaller" playsinline
+                    preload="metadata"></video>
+                <div class="custom-video-controls">
+                    <button class="custom-video-toggle" type="button" aria-label="Play video"
+                        aria-pressed="false">▶</button>
+                    <input class="custom-video-progress" type="range" min="0" max="100" step="0.01" value="0"
+                        aria-label="Video progress">
+                    <span class="custom-video-time">0:00 / 0:00</span>
+                </div>
+            </div>
+
+            <div class="lerobot-cards lerobot-reveal" style="--lerobot-delay: 250ms;">
+                <div class="lerobot-card">
+                    <div class="card-icon">🤖</div>
+                    <h3>Native LeRobot Integration</h3>
+                    <p>Data format is natively compatible with the LeRobot/Hugging Face ecosystem, with no extra
+                        conversion needed for collection and training。</p>
+                </div>
+                <div class="lerobot-card">
+                    <div class="card-icon">🧩</div>
+                    <h3>Standardized Training Data</h3>
+                    <p>Collected data can be used directly for policy training, reducing format conversion and
+                        repeated adaptation。</p>
+                </div>
+                <div class="lerobot-card">
+                    <div class="card-icon">⚡</div>
+                    <h3>Fast First Policy</h3>
+                    <p>Go from unboxing to a working imitation-learning policy within 24 hours, so ideas can be
+                        validated quickly。</p>
+                </div>
+            </div>
+
+            <div class="lerobot-code lerobot-reveal" style="--lerobot-delay: 330ms;">
+                <span class="comment"># https://github.com/HighTorque-Robotics/Panthera-HT_lerobot</span><br>
+                <span class="keyword">from</span> lerobot_robot_panthera <span class="keyword">import</span>
+                PantheraLeader, PantheraFollower<br>
+                <br>
+                leader = PantheraLeader(...)<br>
+                follower = PantheraFollower(...)<br>
+                <br>
+                leader.<span class="keyword">connect</span>()<br>
+                follower.<span class="keyword">connect</span>()<br>
+                <br>
+                action = leader.<span class="keyword">get_action</span>()&nbsp;&nbsp;<span class="comment">#
+                    {"joint1.pos": 0.1, ...}</span><br>
+                follower.<span class="keyword">send_action</span>(action)
+            </div>
+
+            <div class="lerobot-cta lerobot-reveal" style="--lerobot-delay: 410ms;">
+                <a class="btn-primary" href="https://github.com/HighTorque-Robotics/Panthera-HT_lerobot" target="_blank"
+                    rel="noopener">View LeRobot Integration Docs →</a>
+            </div>
+        </div>
+    </section>
+    <script type="module" src="viewer.js?v=20260710-glb-flat"></script>
+    <script>
+        // Translate viewer status messages from Chinese to English
+        const viewerStatus = document.getElementById("viewer-status");
+        if (viewerStatus) {
+            const statusTranslations = {
+                "正在初始化模型 ...": "Initializing model ...",
+                "正在加载 GLB 模型 ...": "Loading GLB models ...",
+                "模型已加载，可以拖动关节和视角。": "Model loaded. Drag joints and viewport to interact.",
+                "Viewer 初始化失败，请检查浏览器控制台。": "Viewer initialization failed. Check the browser console.",
+                "模型加载失败：请通过 HTTP 服务访问页面，不能直接用 file:// 打开。": "Model load failed: Please serve via HTTP, not file://.",
+            };
+            new MutationObserver(() => {
+                const text = viewerStatus.textContent;
+                if (statusTranslations[text]) {
+                    viewerStatus.textContent = statusTranslations[text];
+                } else if (text.startsWith("模型加载失败：")) {
+                    viewerStatus.textContent = text.replace("模型加载失败：", "Model load failed: ").replace("请检查浏览器控制台。", "Check the browser console.");
+                }
+            }).observe(viewerStatus, { childList: true, characterData: true, subtree: true });
+        }
+    </script>
+    <script>
+        const navBrandTop = document.getElementById("nav-brand-top");
+        if (navBrandTop) {
+            navBrandTop.addEventListener("click", (event) => {
+                event.preventDefault();
+                window.scrollTo({ top: 0, behavior: "smooth" });
+            });
+        }
+
+        // Navbar auto-hide on scroll direction
+        const navbar = document.querySelector(".navbar");
+        if (navbar) {
+            let lastScrollY = window.scrollY;
+            window.addEventListener("scroll", () => {
+                const currentScrollY = window.scrollY;
+                if (currentScrollY > lastScrollY && currentScrollY > 80) {
+                    navbar.classList.add("navbar-hidden");
+                } else {
+                    navbar.classList.remove("navbar-hidden");
+                }
+                lastScrollY = currentScrollY;
+            }, { passive: true });
+        }
+
+        const formatVideoTime = (seconds) => {
+            if (!Number.isFinite(seconds)) return "0:00";
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = Math.floor(seconds % 60).toString().padStart(2, "0");
+            return `${minutes}:${remainingSeconds}`;
+        };
+
+        const setupCustomVideoControls = (wrap) => {
+            const video = wrap.querySelector("video");
+            const toggle = wrap.querySelector(".custom-video-toggle");
+            const progress = wrap.querySelector(".custom-video-progress");
+            const time = wrap.querySelector(".custom-video-time");
+            if (!video || !toggle || !progress || !time) return;
+
+            video.volume = 0.25;
+            video.muted = false;
+
+            let volume = wrap.querySelector(".custom-video-volume");
+            if (!volume) {
+                volume = document.createElement("input");
+                volume.className = "custom-video-volume";
+                volume.type = "range";
+                volume.min = "0";
+                volume.max = "1";
+                volume.step = "0.01";
+                volume.value = "0.25";
+                volume.setAttribute("aria-label", "视频音量");
+                time.insertAdjacentElement("beforebegin", volume);
+            }
+
+            let isSeeking = false;
+            let ignoreNativeProgressEvent = false;
+
+            const canShowControls = () => {
+                return !video.classList.contains("video-media-hidden") && !wrap.querySelector(".video-cover-shell:not(.hidden)");
+            };
+
+            const syncControls = () => {
+                const duration = video.duration || 0;
+                const current = video.currentTime || 0;
+                if (!isSeeking && duration > 0) {
+                    progress.value = ((current / duration) * 100).toString();
+                }
+                time.textContent = `${formatVideoTime(current)} / ${formatVideoTime(duration)}`;
+                toggle.textContent = video.paused ? "▶" : "Ⅱ";
+                toggle.setAttribute("aria-label", video.paused ? "播放视频" : "暂停视频");
+                toggle.setAttribute("aria-pressed", video.paused ? "false" : "true");
+                volume.value = video.muted ? "0" : video.volume.toString();
+                wrap.classList.toggle("is-seeking", isSeeking);
+                if (!canShowControls()) {
+                    wrap.classList.remove("show-controls");
+                }
+            };
+
+            const seekVideo = () => {
+                const duration = video.duration || 0;
+                if (duration <= 0) return;
+                video.currentTime = (Number(progress.value) / 100) * duration;
+                syncControls();
+            };
+
+            const getSeekClientX = (event) => {
+                return event.touches?.[0]?.clientX ?? event.changedTouches?.[0]?.clientX ?? event.clientX;
+            };
+
+            const stopSeekEvent = (event) => {
+                if (event.cancelable) event.preventDefault();
+                event.stopPropagation();
+            };
+
+            const updateProgressFromPointer = (event) => {
+                const rect = progress.getBoundingClientRect();
+                const duration = video.duration || 0;
+                const clientX = getSeekClientX(event);
+                if (rect.width <= 0 || duration <= 0 || !Number.isFinite(clientX)) return;
+                const percent = Math.min(100, Math.max(0, ((clientX - rect.left) / rect.width) * 100));
+                progress.value = percent.toString();
+                video.currentTime = (percent / 100) * duration;
+                syncControls();
+            };
+
+            const beginProgressSeek = (event) => {
+                stopSeekEvent(event);
+                isSeeking = true;
+                ignoreNativeProgressEvent = true;
+                wrap.classList.add("is-seeking", "show-controls");
+                if (Number.isFinite(event.pointerId)) {
+                    progress.setPointerCapture?.(event.pointerId);
+                }
+                updateProgressFromPointer(event);
+            };
+
+            const moveProgressSeek = (event) => {
+                if (!isSeeking) return;
+                stopSeekEvent(event);
+                updateProgressFromPointer(event);
+            };
+
+            const finishProgressSeek = (event) => {
+                if (!isSeeking) return;
+                stopSeekEvent(event);
+                updateProgressFromPointer(event);
+                isSeeking = false;
+                wrap.classList.remove("is-seeking");
+                if (Number.isFinite(event.pointerId)) {
+                    progress.releasePointerCapture?.(event.pointerId);
+                }
+                hideControlsIfOutside();
+                window.setTimeout(() => {
+                    ignoreNativeProgressEvent = false;
+                }, 0);
+            };
+            const hideControlsIfOutside = () => {
+                if (!isSeeking && !wrap.matches(":hover")) {
+                    wrap.classList.remove("show-controls");
+                }
+            };
+
+            const togglePlayback = async () => {
+                if (video.paused) {
+                    try {
+                        await video.play();
+                    } catch (_error) {
+                        syncControls();
+                    }
+                } else {
+                    video.pause();
+                }
+            };
+
+            toggle.addEventListener("click", togglePlayback);
+            video.addEventListener("click", () => {
+                if (canShowControls()) {
+                    togglePlayback();
+                }
+            });
+            wrap.querySelector(".custom-video-controls")?.addEventListener("click", (event) => {
+                event.stopPropagation();
+            });
+            volume.addEventListener("input", () => {
+                video.muted = Number(volume.value) === 0;
+                video.volume = Number(volume.value);
+                syncControls();
+            });
+            volume.addEventListener("pointerdown", (event) => {
+                event.stopPropagation();
+            });
+            volume.addEventListener("pointermove", (event) => {
+                event.stopPropagation();
+            });
+            volume.addEventListener("pointerup", (event) => {
+                event.stopPropagation();
+            });
+
+            progress.addEventListener("pointerdown", beginProgressSeek);
+            progress.addEventListener("pointermove", moveProgressSeek);
+            progress.addEventListener("pointerup", finishProgressSeek);
+            progress.addEventListener("pointercancel", finishProgressSeek);
+            progress.addEventListener("mousedown", beginProgressSeek);
+            document.addEventListener("mousemove", moveProgressSeek);
+            document.addEventListener("mouseup", finishProgressSeek);
+            progress.addEventListener("touchstart", beginProgressSeek, { passive: false });
+            document.addEventListener("touchmove", moveProgressSeek, { passive: false });
+            document.addEventListener("touchend", finishProgressSeek, { passive: false });
+            progress.addEventListener("click", (event) => {
+                stopSeekEvent(event);
+                updateProgressFromPointer(event);
+            });
+            progress.addEventListener("input", () => {
+                if (!ignoreNativeProgressEvent) seekVideo();
+            });
+            progress.addEventListener("change", () => {
+                if (ignoreNativeProgressEvent) return;
+                seekVideo();
+                isSeeking = false;
+                wrap.classList.remove("is-seeking");
+                hideControlsIfOutside();
+            });
+            wrap.addEventListener("pointerenter", () => {
+                if (canShowControls()) {
+                    wrap.classList.add("show-controls");
+                }
+            });
+            wrap.addEventListener("pointermove", () => {
+                if (canShowControls()) {
+                    wrap.classList.add("show-controls");
+                }
+            });
+            wrap.addEventListener("pointerleave", () => {
+                hideControlsIfOutside();
+            });
+
+            video.addEventListener("loadedmetadata", syncControls);
+            video.addEventListener("timeupdate", syncControls);
+            video.addEventListener("play", syncControls);
+            video.addEventListener("pause", syncControls);
+            video.addEventListener("ended", syncControls);
+            video.controls = false;
+            syncControls();
+        };
+
+        document.querySelectorAll(".custom-video-wrap").forEach((wrap) => {
+            if (wrap.closest(".video-section")) return;
+            setupCustomVideoControls(wrap);
+        });
+
+        const lerobotSection = document.querySelector(".lerobot-section");
+        if (lerobotSection) {
+            if ("IntersectionObserver" in window) {
+                const lerobotObserver = new IntersectionObserver((entries) => {
+                    entries.forEach((entry) => {
+                        lerobotSection.classList.toggle("is-visible", entry.isIntersecting);
+                    });
+                }, { threshold: 0.18, rootMargin: "0px 0px -12% 0px" });
+                lerobotObserver.observe(lerobotSection);
+            } else {
+                lerobotSection.classList.add("is-visible");
+            }
+        }
+
+        const videoCards = Array.from(document.querySelectorAll(".video-slide"));
+        const videoCoverShells = Array.from(document.querySelectorAll(".video-cover-shell"));
+
+        videoCards.forEach((card) => {
+            const frame = card.querySelector(".video-player-frame");
+            const coverImage = card.querySelector(".video-cover-image");
+            const coverShell = card.querySelector(".video-cover-shell");
+            const src = frame?.dataset?.src || frame?.getAttribute("src");
+            if (!frame || !coverImage || !src) return;
+            frame.src = src;
+            frame.poster = coverImage.currentSrc || coverImage.src;
+            frame.controls = false;
+            frame.loop = true;
+            frame.muted = true;
+            frame.playsInline = true;
+            frame.classList.remove("video-media-hidden");
+            frame.classList.add("is-ready");
+            coverShell?.classList.add("hidden");
+            frame.play().catch(() => { });
+        });
+
+        const demoCaseCards = Array.from(document.querySelectorAll(".demo-case-card"));
+        const demoCaseTrack = document.querySelector(".demo-case-track");
+        const demoCaseViewport = document.querySelector(".demo-case-viewport");
+        const demoCasePrev = document.querySelector(".demo-case-prev");
+        const demoCaseNext = document.querySelector(".demo-case-next");
+        const demoCaseCaption = document.querySelector(".demo-case-caption");
+        let demoCaptionTimer = 0;
+        let activeDemoCaseIndex = Math.min(1, Math.max(0, demoCaseCards.length - 1));
+
+        const updateDemoCases = (options = {}) => {
+            if (!demoCaseTrack || !demoCaseViewport || demoCaseCards.length === 0) return;
+
+            const shouldAnimateCaption = options.animateCaption !== false;
+            window.clearTimeout(demoCaptionTimer);
+            if (shouldAnimateCaption) {
+                demoCaseCaption?.classList.add("is-hidden");
+            }
+
+            demoCaseCards.forEach((card, index) => {
+                const offset = Math.abs(index - activeDemoCaseIndex);
+                const isActive = index === activeDemoCaseIndex;
+                card.classList.toggle("is-active", isActive);
+                card.classList.toggle("is-neighbor", offset === 1);
+                card.classList.toggle("is-distant", offset > 1);
+
+                if (!isActive) {
+                    const video = card.querySelector("video");
+                    if (video) {
+                        video.pause();
+                        video.currentTime = 0;
+                    }
+                    card.querySelector(".custom-video-wrap")?.classList.remove("show-controls", "is-seeking");
+                }
+            });
+
+            if (demoCasePrev) demoCasePrev.disabled = activeDemoCaseIndex === 0;
+            if (demoCaseNext) demoCaseNext.disabled = activeDemoCaseIndex === demoCaseCards.length - 1;
+
+            requestAnimationFrame(() => {
+                const activeCard = demoCaseCards[activeDemoCaseIndex];
+                if (!activeCard) return;
+                const viewportWidth = demoCaseViewport.getBoundingClientRect().width;
+                const targetCenter = activeCard.offsetLeft + activeCard.offsetWidth / 2;
+                const offset = targetCenter - viewportWidth / 2;
+                demoCaseTrack.style.transform = `translate3d(${-offset}px, 0, 0)`;
+
+                demoCaptionTimer = window.setTimeout(() => {
+                    if (!demoCaseCaption) return;
+                    const label = activeCard.querySelector(".demo-case-label")?.textContent?.trim() || "";
+                    demoCaseCaption.textContent = label;
+                    demoCaseCaption.classList.remove("is-hidden");
+                }, shouldAnimateCaption ? 420 : 0);
+            });
+        };
+
+        const setActiveDemoCase = (index) => {
+            if (demoCaseCards.length === 0) return;
+            activeDemoCaseIndex = Math.min(Math.max(index, 0), demoCaseCards.length - 1);
+            updateDemoCases();
+        };
+
+        const toggleDemoVideoPlayback = async (card) => {
+            const video = card.querySelector("video");
+            if (!video) return;
+            card.querySelector(".custom-video-wrap")?.classList.add("show-controls");
+
+            if (video.paused) {
+                try {
+                    await video.play();
+                } catch (_error) {
+                    video.pause();
+                }
+            } else {
+                video.pause();
+            }
+        };
+
+        demoCaseCards.forEach((card, index) => {
+            card.addEventListener("click", (event) => {
+                if (event.target.closest(".custom-video-controls")) return;
+                event.preventDefault();
+
+                if (index !== activeDemoCaseIndex) {
+                    setActiveDemoCase(index);
+                }
+            });
+        });
+
+        demoCasePrev?.addEventListener("click", () => setActiveDemoCase(activeDemoCaseIndex - 1));
+        demoCaseNext?.addEventListener("click", () => setActiveDemoCase(activeDemoCaseIndex + 1));
+
+        let demoDragStartX = 0;
+        let demoDragCurrentX = 0;
+        let demoDragBaseOffset = 0;
+        let demoDragStartCard = null;
+        let isDemoDragging = false;
+        let hasDemoDragMoved = false;
+
+        const getDemoTrackOffset = () => {
+            const transform = window.getComputedStyle(demoCaseTrack).transform;
+            if (!transform || transform === "none") return 0;
+            const matrix = new DOMMatrixReadOnly(transform);
+            return matrix.m41;
+        };
+
+        const finishDemoDrag = () => {
+            if (!isDemoDragging) return;
+            const delta = demoDragCurrentX - demoDragStartX;
+            const startCard = demoDragStartCard;
+            isDemoDragging = false;
+            demoDragStartCard = null;
+            demoCaseViewport?.classList.remove("is-dragging");
+
+            if (!hasDemoDragMoved) {
+                if (startCard?.classList.contains("is-active")) {
+                    toggleDemoVideoPlayback(startCard);
+                }
+                return;
+            }
+
+            if (Math.abs(delta) > 80) {
+                setActiveDemoCase(activeDemoCaseIndex + (delta < 0 ? 1 : -1));
+            } else {
+                updateDemoCases();
+            }
+
+            window.setTimeout(() => {
+                hasDemoDragMoved = false;
+            }, 0);
+        };
+
+        demoCaseViewport?.addEventListener("pointerdown", (event) => {
+            if (event.button !== 0 || event.target.closest(".custom-video-controls")) return;
+            isDemoDragging = true;
+            hasDemoDragMoved = false;
+            demoDragStartCard = event.target.closest(".demo-case-card");
+            demoDragStartX = event.clientX;
+            demoDragCurrentX = event.clientX;
+            demoDragBaseOffset = getDemoTrackOffset();
+            demoCaseViewport.classList.add("is-dragging");
+            demoCaseViewport.setPointerCapture?.(event.pointerId);
+        });
+
+        demoCaseViewport?.addEventListener("pointermove", (event) => {
+            if (!isDemoDragging) return;
+            demoDragCurrentX = event.clientX;
+            let delta = demoDragCurrentX - demoDragStartX;
+            if (activeDemoCaseIndex === 0 && delta > 0) {
+                delta = Math.min(92, Math.sqrt(delta) * 5.2);
+            } else if (activeDemoCaseIndex === demoCaseCards.length - 1 && delta < 0) {
+                delta = Math.max(-92, -Math.sqrt(Math.abs(delta)) * 5.2);
+            }
+            if (Math.abs(delta) > 6) {
+                if (!hasDemoDragMoved) {
+                    window.clearTimeout(demoCaptionTimer);
+                    demoCaseCaption?.classList.add("is-hidden");
+                }
+                hasDemoDragMoved = true;
+            }
+            demoCaseTrack.style.transform = `translate3d(${demoDragBaseOffset + delta}px, 0, 0)`;
+        });
+
+        demoCaseViewport?.addEventListener("pointerup", finishDemoDrag);
+        demoCaseViewport?.addEventListener("pointercancel", finishDemoDrag);
+        demoCaseViewport?.addEventListener("lostpointercapture", finishDemoDrag);
+
+        demoCaseViewport?.addEventListener("click", (event) => {
+            if (!hasDemoDragMoved) return;
+            event.preventDefault();
+            event.stopPropagation();
+        }, true);
+
+        window.addEventListener("resize", () => updateDemoCases({ animateCaption: false }));
+        updateDemoCases({ animateCaption: false });
+
+        // 技术参数动态计数效果
+        function animateCounter(element, target, duration = 1500) {
+            const suffix = element.dataset.suffix || '';
+            const start = 0;
+            const increment = target / (duration / 16);
+            let current = start;
+
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    current = target;
+                    clearInterval(timer);
+                }
+
+                // 根据目标值类型决定显示格式
+                let displayValue;
+                if (target % 1 === 0) {
+                    // 目标值是整数，只显示整数
+                    displayValue = Math.floor(current);
+                } else if (target < 1) {
+                    // 小于1的小数，显示1位小数
+                    displayValue = current.toFixed(1);
+                } else {
+                    // 其他小数，显示2位小数
+                    displayValue = current.toFixed(2);
+                }
+
+                element.textContent = displayValue + suffix;
+            }, 16);
+        }
+
+        // 使用 Intersection Observer 检测元素进入视口
+        const observerOptions = {
+            threshold: 0.3,
+            rootMargin: '0px'
+        };
+
+        const paramObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting && !entry.target.dataset.animated) {
+                    const target = parseFloat(entry.target.dataset.target);
+                    if (!isNaN(target)) {
+                        entry.target.dataset.animated = 'true';
+                        animateCounter(entry.target, target);
+                    }
+                }
+            });
+        }, observerOptions);
+
+        // 观察所有带有 data-target 属性的参数值
+        document.querySelectorAll('.param-value[data-target]').forEach(element => {
+            paramObserver.observe(element);
+        });
+
+    </script>
+</body>
+
+</html>
