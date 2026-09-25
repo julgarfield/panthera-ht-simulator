@@ -1,5 +1,51 @@
 # Verification on the target Windows laptop
 
+## Pick/place and LeRobot update, 2026-09-25
+
+The full suite passed **19 tests** in the isolated export environment (28.62 s).
+The lightweight simulator environment passed 17 tests, with the two optional
+LeRobot tests skipped. Both dependency checks passed. All 16 official asset
+checksums still match; the existing URDF frame, inertia and limit tests passed.
+
+Native Windows runs used Python 3.12.14, MuJoCo 3.3.7 and the Intel Arc Pro 140T
+OpenGL renderer. LeRobot 0.6.1, PyTorch 2.11.0 and torchvision 0.26.0 were used
+only in `.venv-export`. No model or tokenizer was loaded, and no training or data
+upload took place.
+
+| Recorded trial | Result | Camera pairs | 120 Hz controls |
+|---|---|---:|---:|
+| 2 s CLI scripted movement | Failure, retained and excluded by default | 60 | 240 |
+| 20 s seed-0 contact pick/place | Objective success | 600 | 2,400 |
+
+The successful trial lifted the cube using mesh contact, transferred it, opened
+the gripper, and ended with the cube resting inside the target without robot
+contact. The final settled duration was 0.9583 s. No attachment constraint,
+teleport, or success-label override was used. `tools/record_smoke_trial.py`
+reproduces this fixture; it is not a learned policy or a varied demonstration set.
+
+The default export selected only the successful trial. LeRobot loaded all 600
+rows after finalization and after moving the output from its staging directory.
+Both decoded RGB streams matched **every HDF5 pixel**. Seven-value state and
+28-value actions matched the source, including all 2,400 commands. Timestamps,
+integer control indices, task text, seed, terminal labels, metadata boundaries,
+and finite normalization statistics (including q01/q99) were verified.
+
+The optional integration suite additionally exported two failed review episodes,
+checked that future action chunks pad at the boundary instead of entering the
+next episode, constructed a two-camera `PI05Config` with seven state and 28
+action dimensions, and executed an exported action through `PolicyController`.
+A separate rapid-command-change test re-executed 40 blocks (160 controls) and
+matched the arm/gripper state within 2e-6. Incomplete final action blocks and
+invalid policy inputs were rejected. Source HDF5 files remained unchanged.
+
+The target and task status were visually inspected in rendered main, table and
+wrist views. Keyboard collection still uses the same recorder tested here; no
+claim is made that a human manually keyed the successful test. These checks
+establish the dataset/control contract, not π₀.₅ learning performance or physical
+arm readiness. See [LEROBOT_PIPELINE.md](LEROBOT_PIPELINE.md) for transfer limits.
+
+## Original simulator validation
+
 Completed 2026-09-23 local time / 2026-09-24 UTC.
 
 ## Functional tests

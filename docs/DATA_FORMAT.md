@@ -1,4 +1,4 @@
-# Dataset schema 1.0
+# HDF5 dataset schema 1.1 (schema 1.0 replay remains supported)
 
 Each press of SPACE starts/stops one independent episode. Episode numbers are
 allocated by creating a new directory; existing data is never overwritten.
@@ -32,8 +32,17 @@ frozen physics state; no physics step occurs between captures.
 At time **t**, state and cameras observe the current state. The action on that
 row begins at **t** and applies over **[t, t + 1/control_hz)**. The next three
 control actions are in `/control`, not folded into the camera-rate action row.
-For learning, use these controls or explicitly define your own action aggregation
-over the camera interval. Never assume one 30 Hz action was held for four ticks.
+The optional [LeRobot exporter](LEROBOT_PIPELINE.md) packs all four resolved
+seven-value targets into a 28-value action at 30 Hz. Never assume the first
+command was held for four ticks.
+
+Schema 1.1 retains every existing numeric HDF5 dataset and adds metadata:
+`task.instruction`, `task.seed`, `task.cube_start`, `task.target_center`,
+`task.criteria`, `task.metrics`, `task.success`, `task.outcome`,
+`action_contract`, and `policy_blocks_complete`. File `status` describes storage
+completion, separately from task success. Schema 1.0 files are still accepted by
+replay/CSV export but excluded from training export because their task outcome
+and layout were never verified. No old HDF5 files are rewritten.
 
 Pausing stops simulation, camera sampling and logging. No repeated observations
 are inserted. Reset ends the active episode and begins a new scene clock.
