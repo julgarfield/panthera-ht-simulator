@@ -1,0 +1,3 @@
+# Separate optional environment; never install these into the simulator venv.
+-r requirements.txt
+lerobot[dataset]==0.6.1
