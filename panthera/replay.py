@@ -1,4 +1,5 @@
 from pathlib import Path
+from copy import deepcopy
 import csv
 import json
 import h5py
@@ -27,7 +28,7 @@ class EpisodeReplay:
 
     def validate(self):
         f = self.file
-        if self.metadata['schema_version'] != '1.0':
+        if self.metadata['schema_version'] not in ('1.0', '1.1'):
             raise ValueError('Unsupported dataset schema')
         count, controls = len(f['timestamps']), len(f['control/timestamps'])
         if not count or not controls:
@@ -68,7 +69,10 @@ class EpisodeReplay:
             raise ValueError('; '.join(errors))
 
     def config(self):
-        cfg = self.metadata['configuration']
+        cfg = deepcopy(self.metadata['configuration'])
+        if 'task' in self.metadata:
+            cfg['task'] = deepcopy(self.metadata['task']['criteria'])
+            cfg['task']['seed'] = self.metadata['task']['seed']
         cfg['_root'] = str(ROOT)
         validate_config(cfg)
         return cfg

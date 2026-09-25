@@ -31,6 +31,8 @@ def scripted_action(t):
 
 def run_live(args):
     cfg = load_config(args.config)
+    if args.seed is not None:
+        cfg.setdefault('task', {})['seed'] = args.seed
     env = SimulatedPanthera(cfg)
     renderer = Renderer(env, visible=not args.headless)
     keyboard = KeyboardController(renderer.window, cfg)
@@ -87,7 +89,7 @@ def run_live(args):
                     if recorder:
                         path = recorder.close()
                         completed_episodes.append(str(path))
-                        message = f'Saved {path.name}'
+                        message = f'Saved {path.name}: {env.task.metadata()["outcome"].upper()}'
                         print(f'Episode saved: {path}', flush=True)
                         recorder = None
                     else:
@@ -177,6 +179,10 @@ def run_replay(args):
         if current_hash != episode.metadata['urdf_sha256']:
             raise ValueError('Official URDF differs from the recorded episode; restore matching assets')
         env = SimulatedPanthera(cfg)
+        if 'task' not in episode.metadata:
+            env.model.site_rgba[env.model.site('placement_target').id, 3] = 0
+        else:
+            env.model.site_pos[env.model.site('placement_target').id] = episode.metadata['task']['target_center']
         renderer = Renderer(env, visible=not args.headless)
         keyboard = KeyboardController(renderer.window, cfg)
         start = time.perf_counter()
@@ -225,6 +231,7 @@ def main():
     parser.add_argument('--validate', type=Path, help='Validate episode shapes, timestamps and alignment')
     parser.add_argument('--output', type=Path, help='Export output folder')
     parser.add_argument('--record', action='store_true', help='Record immediately at first camera tick')
+    parser.add_argument('--seed', type=int, help='Reproduce a task layout; each reset increments the seed')
     parser.add_argument('--dataset-directory', type=Path)
     parser.add_argument('--headless', action='store_true', help='Hidden OpenGL window (display driver still required)')
     parser.add_argument('--seconds', type=float, help='Stop after this many simulation seconds')
@@ -236,6 +243,8 @@ def main():
     parser.add_argument('--loop', action='store_true', help='Loop replay')
     parser.add_argument('--live-replay-cameras', action='store_true', help='Render cameras during replay instead of showing recorded RGB')
     args = parser.parse_args()
+    if args.seed is not None and args.seed < 0:
+        parser.error('Seed must be non-negative')
     if args.speed <= 0 or (args.seconds is not None and args.seconds <= 0):
         parser.error('Speed and seconds must be positive')
     if args.headless and not (args.seconds or args.replay or args.export or args.validate):
