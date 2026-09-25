@@ -13,5 +13,5 @@ def shared_env():
 
 @pytest.fixture
 def env(shared_env):
-    shared_env.reset()
+    shared_env.reset(seed=0)
     return shared_env

@@ -51,12 +51,14 @@ def test_cartesian_translation_and_wrist_mount(env):
 
 def test_grasp_and_lift_with_contacts(env):
     initial_height = env.get_observation()['object_poses'][0,2]
-    for goal, grip, seconds in [([.34,.02,.764], 0, 4), ([.34,.02,.764], -.025, 2), ([.34,.02,.94], 0, 4)]:
+    x, y = env.task.cube_start[:2]
+    for goal, grip, seconds in [([x,y,.764], 0, 4), ([x,y,.764], -.025, 2), ([x,y,.94], 0, 4)]:
         for _ in range(int(seconds/env.dt)):
             error = np.asarray(goal)-env.get_observation()['end_effector_pose'][:3]
             env.step(Action(mode='cartesian', cartesian_twist=np.r_[np.clip(error*2,-.06,.06),0,0,0], gripper_velocity=grip))
     assert env.get_observation()['object_poses'][0,2] > initial_height+.10
     assert env.targets[6] < env.data.qpos[env.qids[6]]  # contact pressure remains on key release
+    assert env.task.lifted
 
 
 def test_keyboard_press_hold_release_and_focus(env):
