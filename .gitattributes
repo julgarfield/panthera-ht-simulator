@@ -1,3 +1,3 @@
 # Keep the official asset bytes identical to the pinned upstream Git blobs.
 assets/panthera/** -text
-research/official_page.html -text
+research/official_page.html -text linguist-documentation
