@@ -9,36 +9,26 @@ replay.
 
 ![Simulator interface](docs/preview.png)
 
-## Start on this machine
+## Download and run on Windows 11
 
-The project-local Python environment and official robot assets are already
-installed. Double-click **Launch Simulator.cmd**, or open a terminal in this
-`panthera_sim` directory and run:
-
-```powershell
-.\.venv\Scripts\python.exe main.py
-```
-
-Or run `run.ps1`. Click the simulator window before using the keyboard. Changing
-window focus automatically pauses the simulation; press **P** to resume.
-
-## Install on another Windows 11 computer
-
-Install **64-bit Python 3.12** with the Python launcher, then:
+On this GitHub page, click **Code → Download ZIP** and extract it, or clone the
+repository with Git. Install **64-bit Python 3.12** with the Python launcher.
+Open PowerShell in the extracted `panthera-ht-simulator-main` folder (or your
+cloned repository folder), then run:
 
 ```powershell
-cd "path\to\panthera_sim"
 py -3.12 -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
 .\.venv\Scripts\python.exe tools/fetch_assets.py --verify
 .\.venv\Scripts\python.exe main.py
 ```
 
-`setup.ps1` performs these steps once Python is installed. No environment
-activation is needed. If you already activated this environment, `python main.py`
-or `python -m panthera` works. The application resolves config and asset paths
-relative to the project/config file, so launch does not depend on the terminal's
-working directory. The PowerShell wrappers also select their own directory.
+After setup, double-click **Launch Simulator.cmd** to run it again. `setup.ps1`
+also performs the setup steps once Python is installed. No environment activation
+or WSL is needed. Click the simulator window before using the keyboard. Changing
+window focus automatically pauses the simulation; press **P** to resume.
+The application resolves config and asset paths relative to the project/config
+file, so launch does not depend on the terminal's working directory.
 
 All necessary official meshes are bundled. To restore missing or modified
 upstream assets, run `python tools/fetch_assets.py` without `--verify`; it downloads
@@ -113,12 +103,6 @@ The UI shows mode, selected joint, measured angles, recording indicator, episode
 simulation rate, camera rate and real-time factor. **P** freezes the entire world
 and logging; it does not let gravity continue while the robot is stopped.
 
-To immediately watch the verified sample included in this local workspace:
-
-```powershell
-.\.venv\Scripts\python.exe main.py --replay validation_runs/episode_0002
-```
-
 Cartesian mode uses damped, incremental Jacobian IK. It respects source position
 limits and bounds joint target speeds; difficult directions near singularities
 may move slowly or leave a nonzero IK residual. There is no accumulated
@@ -151,12 +135,10 @@ gripper and object states; it does not re-simulate commands and claim identical
 contact outcomes. Dataset metadata contains the complete configuration, robot
 provenance, units, rates, timestamps, camera intrinsics and sample counts.
 
-Development test recordings remain in the local workspace. The verified
-30-second sample is `validation_runs/episode_0002`; `datasets/episode_0001` is an
-intentionally retained incomplete development run. Use the episode number shown
-by the red recording indicator for your own sessions. New recordings always
-receive an unused number. The source ZIP excludes recordings and installed
-Python environments, and includes all required official robot assets.
+Use the episode number shown by the red recording indicator for your own
+sessions. New recordings always receive an unused number. The source ZIP
+excludes recordings and installed Python environments, and includes all
+required official robot assets.
 
 ```text
 datasets/episode_0001/
