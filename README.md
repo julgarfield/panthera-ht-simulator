@@ -4,8 +4,9 @@ A runnable Windows desktop application for keyboard teleoperation and synchroniz
 demonstration collection using **HighTorque Robotics' official standard
 Panthera-HT six-axis model**, including its articulated gripper and wrist camera
 housing. Includes a physics-enabled table, cube, cylinder and block; a movable 3D
-viewport; two 640×480 RGB views; HDF5 recording; CSV/PNG export; and trajectory
-replay.
+viewport; two 640×480 RGB views; HDF5 recording; CSV/PNG and LeRobot export;
+and trajectory replay. The first collection task is **pick up the red cube and
+place it in the green target area**, with seeded layouts and an objective success check.
 
 ![Simulator interface](docs/preview.png)
 
@@ -116,11 +117,17 @@ the default cube without adding a constraint that attaches it to the gripper.
 
 ## Record, inspect, replay
 
-1. Launch and position the arm.
+1. Launch with `.\.venv\Scripts\python.exe main.py` or **Launch Simulator.cmd**.
+   Optionally add `--seed 1000` to reproduce a layout. **Backspace** resets the
+   scene and advances the seed; restart with the same `--seed` to retry that layout.
 2. Press **Space**. The red REC indicator shows the active episode.
-3. Move the arm and gripper. Both camera images and state are sampled at 30 Hz;
-   every control command and state is additionally stored at 120 Hz.
-4. Press **Space** again. Wait for the saved message before closing the window.
+3. Grasp and lift the red cube, move it above the green square, lower it, then
+   open the gripper and withdraw. Wait for **SUCCESS** in the display. Recording
+   must start before the lift; each recording starts a fresh success check.
+4. Press **Space** again. Wait for the saved success/failure message before
+   resetting or closing. Both camera images and state are sampled at 30 Hz;
+   every control command and state is also stored at 120 Hz. Failed trials are
+   saved too. Inspect `metadata.json` for the instruction, seed, criteria and outcome.
 5. Use the episode path below, adjusting its number:
 
 ```powershell
@@ -155,9 +162,53 @@ datasets/episode_0001/
 ```
 
 [DATA_FORMAT.md](docs/DATA_FORMAT.md) defines every array, timestamp, coordinate
-convention and action alignment. Keep the 120 Hz stream when reconstructing the
-actual command history. This schema can be adapted to imitation learning/VLA
-training; it is not presented as a drop-in LeRobot dataset.
+convention and action alignment. HDF5 remains the source recording format.
+
+## Export for a future LeRobot π₀.₅ pipeline
+
+Create a **separate** optional Python environment. Normal launch continues to
+use `.venv`; it does not need PyTorch or LeRobot. This command installs dataset
+tools, not model weights or the π₀.₅ training extra:
+
+```powershell
+py -3.12 -m venv .venv-export
+.\.venv-export\Scripts\python.exe -m pip install -r requirements-export.txt
+.\.venv-export\Scripts\python.exe -m panthera.lerobot_export --source datasets --output lerobot_datasets/red_cube_v1
+```
+
+Only completed **successful** new trials are included by default. Use a new
+output folder for each export. `--include-failures` makes a review dataset;
+it does not change the HDF5 labels. Older recordings without verified task
+metadata are reported as excluded, rather than assigned invented labels.
+An eligible recording with missing/misaligned commands, incompatible camera
+dimensions, or a partial final four-tick interval causes an explicit error.
+Stopping with **Space** completes that interval; quitting/resetting mid-interval
+can leave a complete HDF5 file that is unsuitable for training export.
+
+The exporter calls LeRobot 0.6.1's native dataset writer and reloads the result
+with LeRobot. It verifies every decoded image against HDF5, state/action values,
+timestamps, task labels, normalization statistics and episode boundaries. RGB is
+stored losslessly using LeRobot **image features** (not MP4), with two camera
+streams. This uses more disk space but works natively on Windows without an
+external video encoder. Neither recordings nor exports are uploaded.
+
+```powershell
+.\.venv-export\Scripts\python.exe -m panthera.lerobot_export --validate lerobot_datasets/red_cube_v1 --compare-sources
+```
+
+The 30 Hz action has **28 values: four ordered sets of six arm joint position
+targets and one coupled-gripper target**. Each set executes for 1/120 second.
+All intervening commands survive conversion, including Cartesian IK and release
+behavior. This representation requires the supplied `PolicyController` during
+rollout; it is not a conventional seven-value action held for a camera interval.
+See [LEROBOT_PIPELINE.md](docs/LEROBOT_PIPELINE.md) for the exact contract,
+policy integration, compatibility checks and physical-arm transfer limitations.
+
+Keep evaluation layouts separate by reserving a different seed range; for example,
+collect training trials from 0–999 and evaluation trials from 1000 onward in a
+different recordings folder. A small pipeline pilot should precede a larger,
+varied collection. No number of demonstrations guarantees learning success.
+The laptop's 8 GB GPU is not the intended π₀.₅ fine-tuning machine.
 
 ## Configuration
 

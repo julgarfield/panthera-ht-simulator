@@ -15,6 +15,8 @@ def load_config(path=None):
 
 
 def validate_config(cfg):
+    from .task import validate_task_config
+    validate_task_config(cfg)
     sim = cfg['simulation']
     for key in ('physics_hz', 'control_hz', 'display_hz'):
         if not isinstance(sim[key], int) or sim[key] <= 0:

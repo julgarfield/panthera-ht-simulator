@@ -11,6 +11,7 @@ import h5py
 import numpy as np
 from . import __version__
 from .config import portable_config, resolve, ROOT
+from .policy import ACTION_CONTRACT
 
 MODE_IDS = {'joint': 0, 'cartesian': 1, 'home': 2}
 
@@ -35,6 +36,8 @@ class EpisodeRecorder:
         else:
             raise RuntimeError('No unused episode number')
         self.start_time = env.timestamp
+        self.env = env
+        env.task.begin_episode()
         self.wall_start = time.perf_counter()
         self.controls = self.frames = 0
         self.error = None
@@ -42,7 +45,7 @@ class EpisodeRecorder:
         self.queue = Queue(maxsize=cfg['logging']['queue_size'])
         self.backpressure_seconds = 0.0
         self.metadata = {
-            'schema_version': '1.0', 'simulator': 'MuJoCo', 'simulator_version': version('mujoco'),
+            'schema_version': '1.1', 'simulator': 'MuJoCo', 'simulator_version': version('mujoco'),
             'application_version': __version__, 'robot_model': 'Panthera-HT / official RoboTwin panthera-6dof',
             'created_utc': datetime.now(timezone.utc).isoformat(), 'status': 'recording',
             'physics_hz': cfg['simulation']['physics_hz'], 'control_hz': cfg['simulation']['control_hz'],
@@ -56,6 +59,7 @@ class EpisodeRecorder:
             'mode_ids': MODE_IDS, 'gpu': gpu, 'configuration': portable_config(cfg),
             'urdf_sha256': hashlib.sha256(resolve(cfg, cfg['robot']['urdf_path']).read_bytes()).hexdigest(),
             'model_dimensions': {'nq': env.model.nq, 'nv': env.model.nv},
+            'task': env.task.metadata(), 'action_contract': ACTION_CONTRACT,
         }
         manifest = ROOT / 'assets/panthera/provenance.json'
         if manifest.exists():
@@ -135,7 +139,7 @@ class EpisodeRecorder:
     def _worker(self):
         try:
             with h5py.File(self.path/'episode.partial.h5', 'w') as file:
-                file.attrs['schema_version'] = '1.0'
+                file.attrs['schema_version'] = self.metadata['schema_version']
                 file.attrs['metadata_json'] = json.dumps(self.metadata)
                 stopping = False
                 while True:
@@ -195,17 +199,22 @@ class EpisodeRecorder:
         self.closed = True
         wall_seconds = time.perf_counter()-self.wall_start
         self.metadata.update(status='incomplete' if self.error or aborted else 'complete',
+                             task=self.env.task.metadata(),
                              number_of_samples=self.frames, number_of_control_samples=self.controls,
                              episode_duration=self.controls/self.cfg['simulation']['control_hz'],
                              wall_duration=wall_seconds, measured_capture_fps=self.frames/max(wall_seconds, 1e-9),
                              writer_backpressure_seconds=self.backpressure_seconds)
         if self.error:
             self.metadata['error'] = repr(self.error)
+        # A truncated final control block is retained for review, never silently
+        # padded or dropped by the training exporter.
+        self.metadata['policy_blocks_complete'] = self.controls == self.frames*4 and self.frames > 0
         self._write_metadata()
-        if self.error is None and not aborted:
+        if self.error is None:
             with h5py.File(self.path/'episode.partial.h5', 'a') as file:
                 file.attrs['metadata_json'] = json.dumps(self.metadata)
-                file.attrs['complete'] = True
-            (self.path/'episode.partial.h5').replace(self.path/'episode.h5')
+                file.attrs['complete'] = not aborted
+            if not aborted:
+                (self.path/'episode.partial.h5').replace(self.path/'episode.h5')
         self.check()
         return self.path

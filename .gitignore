@@ -1,4 +1,6 @@
 .venv/
+.venv-export/
+lerobot_datasets/
 __pycache__/
 .pytest_cache/
 build/

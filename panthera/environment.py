@@ -2,6 +2,7 @@ import mujoco
 import numpy as np
 from .model import build_model
 from .interfaces import Action
+from .task import PickPlaceTask
 
 
 class SimulatedPanthera:
@@ -34,13 +35,17 @@ class SimulatedPanthera:
         self.latest_images = {}
         self.latest_image_timestamp = None
         self.limit_corrections = 0
+        self.task = PickPlaceTask(self)
         self.reset()
 
     @property
     def timestamp(self):
         return self.tick / self.cfg['simulation']['control_hz']
 
-    def reset(self):
+    def reset(self, seed=None):
+        next_seed = (self.task.cfg['seed'] if self.task.seed is None else self.task.seed+1) if seed is None else seed
+        if not isinstance(next_seed, (int, np.integer)) or not 0 <= next_seed < np.iinfo(np.int64).max:
+            raise ValueError('Task seed must be a non-negative signed 64-bit integer')
         home = np.asarray(self.cfg['robot']['home_configuration'], dtype=float)
         if np.any(home < self.lower[:6]) or np.any(home > self.upper[:6]):
             raise ValueError('Configured home violates official joint limits')
@@ -56,7 +61,21 @@ class SimulatedPanthera:
         self.limit_corrections = 0
         self.latest_images = {}
         self.latest_image_timestamp = None
+        self.task.reset(next_seed)
         mujoco.mj_forward(self.model, self.data)
+
+    def apply_position_target(self, target):
+        """Execute the same resolved targets saved by teleoperation, with its guards."""
+        target = np.asarray(target, dtype=float)
+        if target.shape != (7,) or not np.isfinite(target).all():
+            raise ValueError('Expected six joint targets and one gripper target')
+        coupled = np.r_[target, -target[6]]
+        q = self.data.qpos[self.qids]
+        lead = np.r_[np.full(6, self.cfg['controls']['max_target_lead']), .015, .015]
+        self.targets = np.clip(np.clip(coupled, q-lead, q+lead), self.lower, self.upper)
+        self.targets[7] = -self.targets[6]
+        self.previous_velocity[:] = 0
+        return self.targets.copy()
 
     def hold(self):
         self.targets[:6] = np.clip(self.data.qpos[self.qids[:6]], self.lower[:6], self.upper[:6])
@@ -122,6 +141,8 @@ class SimulatedPanthera:
         # Position-dependent fields after mj_step can lag qpos by one substep.
         self.data.time = self.timestamp
         mujoco.mj_forward(self.model, self.data)
+
+        self.task.update()
 
     def step(self, action):
         self.apply_action(action)

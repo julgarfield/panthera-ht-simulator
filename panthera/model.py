@@ -163,6 +163,12 @@ def build_model(cfg):
     table = cfg['environment']
     center, half = np.array(table['table_position']), np.array(table['table_size']) / 2
     ET.SubElement(world, 'geom', name='table', type='box', pos=numbers(center), size=numbers(half), rgba='0.58 0.44 0.3 1', friction='1 0.01 0.001')
+    # A visual site has no collision, mass, or effect on the official robot.
+    from .task import DEFAULT_TASK
+    target_half = cfg.get('task', {}).get('target_half_size', DEFAULT_TASK['target_half_size'])
+    ET.SubElement(world, 'site', name='placement_target', type='box',
+                  pos=numbers([.44, -.04, center[2]+half[2]+.0005]),
+                  size=numbers([target_half, target_half, .0004]), rgba='0.1 0.9 0.25 0.55')
     for x in (-1, 1):
         for y in (-1, 1):
             h = (center[2]-half[2])/2

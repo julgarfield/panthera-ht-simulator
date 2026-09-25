@@ -122,11 +122,11 @@ class Renderer:
             f'Joint angles (deg): {angles}',
             f'Sim {status.get("physics_fps", 0):.0f} steps/s | Cameras {status.get("camera_fps", 0):.1f} FPS | Sim/wall {status.get("realtime_factor", 0):.2f}x',
             f'Time {self.env.timestamp:.2f}s | Speed x{status.get("speed", 1):.2f} | IK residual {self.env.last_ik_residual:.3f}',
-            '1-6 select joint | Q/E or LEFT/RIGHT move | TAB joint/Cartesian',
-            'Cartesian: W/S +X/-X | A/D +Y/-Y | R/F +Z/-Z (world axes)',
-            'Orientation: U/J roll | I/K pitch | O/L yaw | Z/X open/close',
-            'SPACE record | P pause / emergency stop | H home | BACKSPACE reset',
-            '[ / ] slower/faster | ESC quit | Mouse: drag orbit, right pan, wheel zoom',
+            f'Red cube -> green target | Seed {self.env.task.seed} | ' + ('SUCCESS' if self.env.task.success else 'Lifted; place and release' if self.env.task.lifted else 'Pick up the cube'),
+            '1-6 joint | Q/E or arrows move | TAB joint/Cartesian',
+            'World: W/S X | A/D Y | R/F Z | U/J roll | I/K pitch | O/L yaw',
+            'Z/X open/close | SPACE record | P pause | H home | BACKSPACE new seed',
+            '[ / ] speed | ESC quit | Mouse: left orbit, right pan, wheel zoom',
             status.get('message', '')[:110],
         ])
         self._text(mujoco.MjrRect(10, 0, left_width-15, footer), text)
